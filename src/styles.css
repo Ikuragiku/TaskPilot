@@ -1,0 +1,1130 @@
+/* ============================================
+   ORGANIZE-ME STYLESHEET
+   Material Design inspired task management UI
+   ============================================ */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================ */
+:root {
+  /* Color Palette - Dark Theme */
+  --bg: #0b0f14;                    /* Primary background */
+  --panel: #111821;                 /* Card/panel background (gradient start) */
+  --panel-2: #0e151d;               /* Card/panel background (gradient end) */
+  --text: #e6edf3;                  /* Primary text color */
+  --text-secondary: #8b92a0;        /* Secondary/muted text */
+  --muted: #9aa4b2;                 /* Placeholder text */
+  --primary: #2f81f7;               /* Primary action color (blue) */
+  --primary-hover: #4a8ff8;         /* Primary hover state */
+  --danger: #f85149;                /* Destructive actions (red) */
+  --ok: #3fb950;                    /* Success states (green) */
+  --border: #263241;                /* Default border color */
+  --border-subtle: #1e2a38;         /* Subtle borders */
+  
+  /* Surface Elevation Levels */
+  --shade: rgba(255,255,255,0.04);         /* Hover overlay on rows */
+  --shade-hover: rgba(255,255,255,0.08);   /* Active hover state */
+  --surface-1: rgba(255,255,255,0.02);     /* Lowest elevation */
+  --surface-2: rgba(255,255,255,0.04);     /* Medium elevation */
+  --surface-3: rgba(255,255,255,0.06);     /* Highest elevation */
+  
+  /* Shadow System - 4 levels of depth */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.3);   /* Subtle depth */
+  --shadow-2: 0 2px 6px rgba(0,0,0,0.4);   /* Small cards/chips */
+  --shadow-3: 0 4px 12px rgba(0,0,0,0.5);  /* Cards and panels */
+  --shadow-4: 0 8px 24px rgba(0,0,0,0.6);  /* Dropdowns and modals */
+  
+  /* Border Radius Scale */
+  --radius-sm: 6px;                 /* Small elements (badges, inputs) */
+  --radius-md: 8px;                 /* Medium elements (buttons, tabs) */
+  --radius-lg: 12px;                /* Large containers (cards) */
+  
+  /* Animation Timing Functions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);   /* Quick interactions */
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);   /* Standard transitions */
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);   /* Slow/smooth animations */
+}
+
+/* ============================================
+   GLOBAL RESET & BASE STYLES
+   ============================================ */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+html, body { 
+  height: 100%; 
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  /* Multi-layer radial gradient background for depth */
+  background: radial-gradient(1400px 900px at 20% -10%, #13202f 0, transparent 50%),
+              radial-gradient(1400px 900px at 120% -20%, #0f1a27 0, transparent 50%),
+              var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   LAYOUT CONTAINERS
+   ============================================ */
+.container { 
+  max-width: 1280px; 
+  margin: 0 auto; 
+  padding: 1.5rem; 
+}
+
+.app-header {
+  padding: 1.75rem 1.25rem 0.75rem;
+  text-align: center;
+  position: relative;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  /* Gradient text effect */
+  background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle { 
+  margin: 0.25rem 0 0; 
+  color: var(--muted); 
+}
+
+/* ============================================
+   CARD COMPONENT
+   Primary container for task table
+   ============================================ */
+.card {
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin: 1rem 0;
+  box-shadow: var(--shadow-3), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  transition: box-shadow var(--transition-base);
+}
+
+.card:hover { 
+  box-shadow: var(--shadow-4), 0 0 0 1px rgba(255,255,255,0.03) inset; 
+}
+
+.card h2 { 
+  margin: 0 0 0.75rem; 
+  font-size: 1.2rem; 
+}
+
+/* ============================================
+   FORM ELEMENTS & INPUTS
+   ============================================ */
+.grid { 
+  display: grid; 
+  gap: 0.75rem; 
+  grid-template-columns: repeat(6, 1fr); 
+}
+
+.field { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.35rem; 
+  grid-column: span 2; 
+}
+
+.field-full { 
+  grid-column: 1 / -1; 
+}
+
+.checkbox-field { 
+  align-items: start; 
+  justify-content: end; 
+}
+
+label { 
+  color: var(--muted); 
+  font-size: 0.9rem; 
+}
+
+/* Text inputs, date picker, search box, textarea */
+input[type="text"], 
+input[type="date"], 
+input[type="search"], 
+textarea {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+input[type="text"]:focus, 
+input[type="date"]:focus, 
+input[type="search"]:focus, 
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 3px rgba(47,129,247,0.1);
+}
+
+input[type="search"] {
+  min-width: 200px;
+}
+
+/* Checkbox styling with color transitions */
+input[type="checkbox"] {
+  transform: scale(1.15);
+  cursor: pointer;
+  accent-color: var(--border);      /* Unchecked state: gray */
+  transition: all var(--transition-fast);
+}
+
+input[type="checkbox"]:checked {
+  accent-color: var(--ok);          /* Checked state: green */
+}
+
+input[type="checkbox"]:hover {
+  transform: scale(1.2);
+}
+
+/* Deadline cell with hidden date picker */
+.deadline-cell { 
+  cursor: pointer; 
+  position: relative; 
+}
+
+.deadline-picker-hidden {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+textarea { 
+  width: 100%; 
+  resize: vertical; 
+  font-family: inherit; 
+  min-height: 80px; 
+}
+
+/* ============================================
+   CUSTOM SCROLLBARS
+   Consistent dark theme scrollbar styling
+   ============================================ */
+::-webkit-scrollbar { 
+  width: 12px; 
+  height: 12px; 
+}
+
+::-webkit-scrollbar-track { 
+  background: var(--panel-2); 
+  border-radius: var(--radius-sm); 
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--panel-2);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover { 
+  background: var(--border); 
+}
+
+/* Thinner scrollbar for dropdown lists */
+.dd-list::-webkit-scrollbar { 
+  width: 8px; 
+}
+
+.dd-list::-webkit-scrollbar-thumb { 
+  border: 1px solid var(--panel-2); 
+}
+
+/* ============================================
+   BUTTON COMPONENTS
+   Material Design inspired with ripple effect
+   ============================================ */
+.actions { 
+  display: flex; 
+  gap: 0.625rem; 
+  margin-top: 0.875rem; 
+}
+
+.btn {
+  position: relative;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text);
+  padding: 0.5rem 0.875rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Ripple effect on button click */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  width: 0; 
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-slow), height var(--transition-slow);
+}
+
+.btn:hover {
+  background: var(--surface-2);
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-1);
+}
+
+.btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Primary action button (blue) */
+.btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(47,129,247,0.3);
+}
+
+.btn.primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(47,129,247,0.4);
+}
+
+/* Destructive action button (red) */
+.btn.danger { 
+  background: var(--danger); 
+  border-color: var(--danger); 
+}
+
+.btn.danger.outline { 
+  background: transparent; 
+  color: var(--danger); 
+  border-color: var(--danger); 
+}
+
+/* Smaller button variant */
+.btn.small { 
+  padding: 0.35rem 0.625rem; 
+  font-size: 0.8125rem; 
+}
+
+/* ============================================
+   TABS & TOOLBAR
+   Project tabs with active state and add button
+   ============================================ */
+.tabs-toolbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.tabs-container { 
+  display: flex; 
+  gap: 0.375rem; 
+  flex-wrap: wrap; 
+  align-items: center; 
+}
+
+.tab {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);     /* Fully rounded tabs */
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.tab:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(47,129,247,0.3);
+}
+
+.tab.add-tab {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+}
+
+/* Action buttons container (add task, filter, sort, search) */
+.table-actions { 
+  display: flex; 
+  gap: 0.625rem; 
+  align-items: center; 
+  flex-wrap: wrap; 
+}
+
+/* Icon-only toolbar buttons with ripple effect */
+.icon-btn-toolbar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem !important;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+}
+
+.icon-btn-toolbar::before {
+  content: '';
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  width: 0; 
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-slow), height var(--transition-slow);
+}
+
+.icon-btn-toolbar svg { 
+  display: block; 
+}
+
+.icon-btn-toolbar:hover {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+}
+
+.icon-btn-toolbar:active { 
+  transform: translateY(0); 
+}
+
+.icon-btn-toolbar:active::before { 
+  width: 100px; 
+  height: 100px; 
+}
+
+/* Active state when filter/sort is applied */
+.icon-btn-toolbar.active {
+  background: rgba(47,129,247,0.15);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(47,129,247,0.08);
+}
+/* ============================================
+   FILTER & SORT CHIPS
+   Visual representation of active filters/sorts
+   ============================================ */
+.active-criteria {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.active-criteria.has-chips { 
+  border-bottom-color: var(--border-subtle); 
+}
+
+.chips-compact { 
+  display: flex; 
+  gap: 0.5rem; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  flex: 1; 
+}
+
+/* Chip component for individual filters/sorts */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.625rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+  font-size: 0.8125rem;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+
+.chip:hover {
+  background: var(--surface-3);
+  border-color: var(--border);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+
+.chip .prop { 
+  color: var(--text-secondary); 
+  font-size: 0.75rem; 
+  font-weight: 500; 
+}
+
+.chip .sep { 
+  color: var(--border); 
+  margin: 0 0.25rem; 
+}
+
+.chip .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.2);
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.chip .remove {
+  cursor: pointer;
+  color: var(--text-secondary);
+  border: 0;
+  background: transparent;
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  margin-left: 0.25rem;
+  font-size: 1rem;
+  line-height: 1;
+  transition: all var(--transition-fast);
+}
+
+.chip .remove:hover {
+  background: rgba(255,255,255,0.15);
+  color: var(--text);
+}
+
+/* Sort chips - blue accent */
+.chip.sort {
+  background: rgba(47,129,247,0.12);
+  border-color: rgba(47,129,247,0.3);
+}
+
+.chip.sort:hover {
+  background: rgba(47,129,247,0.18);
+  border-color: rgba(47,129,247,0.4);
+}
+
+.chip.sort .prop { 
+  color: rgba(47,129,247,0.9); 
+}
+
+/* Clear all / add chip buttons */
+.clear-all-btn, 
+.add-chip-btn {
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+  line-height: 1.4;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.clear-all-btn:hover, 
+.add-chip-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+  transform: translateY(-1px);
+}
+
+.add-chip-btn { 
+  border-style: dashed; 
+}
+
+.add-chip-btn:hover { 
+  border-style: solid; 
+}
+/* ============================================
+   TASKS TABLE
+   Main data table with fixed layout and inline editing
+   ============================================ */
+.table-wrap { 
+  overflow: auto; 
+  border-radius: 10px; 
+  border: 1px solid var(--border); 
+}
+
+.tasks-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  background: #0b1118; 
+  table-layout: fixed;              /* Fixed layout prevents auto-expansion */
+}
+
+.tasks-table th, 
+.tasks-table td { 
+  padding: 0.65rem 0.6rem; 
+  border-bottom: 1px solid var(--border); 
+  vertical-align: top; 
+  overflow: hidden;
+  text-overflow: ellipsis;          /* Truncate long text */
+}
+
+/* Contenteditable cells: constrain width normally, expand on focus */
+.tasks-table td[contenteditable="true"] {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.tasks-table td[contenteditable="true"]:focus {
+  white-space: normal;
+  overflow: visible;
+}
+
+/* ============================================
+   TABLE HEADER
+   Sticky header with drag-to-reorder and click-to-sort
+   ============================================ */
+.tasks-table thead th { 
+  position: sticky; 
+  top: 0; 
+  background: #0d131b; 
+  text-align: left; 
+  color: var(--muted); 
+  font-weight: 600; 
+  font-size: 0.9rem; 
+  user-select: none; 
+  cursor: grab; 
+  transition: all 0.15s ease; 
+  position: relative; 
+}
+
+/* Sort indicator (arrow + index) */
+.tasks-table thead th .sort-ind { 
+  margin-left: 0.35rem; 
+  font-size: 0.8em; 
+  color: var(--text); 
+}
+
+.tasks-table thead th .sort-ind .idx { 
+  opacity: 0.8; 
+  font-size: 0.85em; 
+  margin-left: 0.15rem; 
+}
+
+.tasks-table thead th:hover { 
+  background: rgba(47,129,247,0.15); 
+}
+
+.tasks-table thead th:active { 
+  cursor: grabbing; 
+  background: rgba(47,129,247,0.25); 
+}
+
+/* Drag states for column reordering */
+.tasks-table thead th.th-dragging { 
+  opacity: 0.4; 
+  cursor: grabbing; 
+}
+
+.tasks-table thead th.th-drop-target {
+  background: rgba(47,129,247,0.3);
+  box-shadow: 0 0 0 2px var(--primary) inset;
+  transform: scale(1.02);
+}
+
+/* ============================================
+   TABLE BODY
+   Task rows with hover effects and special rows
+   ============================================ */
+.tasks-table tbody tr:hover { 
+  background: var(--shade); 
+}
+
+/* Add task row at bottom of table */
+.tasks-table tr.add-task-row { 
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.tasks-table tr.add-task-row:hover { 
+  background: var(--surface-1); 
+  opacity: 1;
+}
+
+.tasks-table tr.add-task-row td { 
+  border-bottom: none; 
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.tasks-table tr.add-task-row .btn {
+  border-style: dashed;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.tasks-table tr.add-task-row .btn:hover {
+  border-style: solid;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Column width constraints */
+.col-done { 
+  width: 70px; 
+}
+
+.col-actions { 
+  width: 150px; 
+}
+/* ============================================
+   BADGES & STATUS INDICATORS
+   Color-coded pills for status and project values
+   ============================================ */
+.muted { 
+  color: var(--muted); 
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+  background: var(--surface-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-1);
+  transition: all var(--transition-fast);
+}
+
+.badge:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+
+.badge.ok { 
+  background: rgba(63,185,80,0.12); 
+  border-color: rgba(63,185,80,0.35); 
+  color: #4dd06d; 
+}
+
+/* Status/project cells are clickable to open dropdown */
+.tasks-table td[data-field="status"],
+.tasks-table td[data-field="project"] { 
+  cursor: pointer; 
+}
+
+.tasks-table td[data-field="status"] .badge,
+.tasks-table td[data-field="project"] .badge {
+  margin-right: 0.375rem;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+}
+
+/* ============================================
+   DROPDOWN MENUS
+   Context menus for status/project editing
+   ============================================ */
+.dd-menu {
+  position: absolute;
+  z-index: 1000;
+  min-width: 240px;
+  background: linear-gradient(180deg, #0d151f 0%, #0b1219 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-4), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  overflow: hidden;
+  animation: slideUp var(--transition-fast);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dd-sec { 
+  padding: 0.625rem; 
+  border-bottom: 1px solid var(--border-subtle); 
+}
+
+.dd-sec:last-child { 
+  border-bottom: 0; 
+}
+
+.dd-title {
+  margin: 0 0 0.5rem;
+  padding: 0 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.dd-list { 
+  list-style: none; 
+  margin: 0; 
+  padding: 0; 
+  max-height: 240px; 
+  overflow: auto; 
+}
+
+/* Dropdown list item with ripple effect */
+.dd-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  overflow: hidden;
+}
+
+.dd-item::before {
+  content: '';
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  width: 0; 
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-slow), height var(--transition-slow);
+}
+
+.dd-item:hover { 
+  background: var(--surface-2); 
+}
+
+.dd-item:active { 
+  background: var(--surface-3); 
+}
+
+.dd-item:active::before { 
+  width: 200px; 
+  height: 200px; 
+}
+
+/* Drag-and-drop states for reordering options */
+.dd-item.dragging { 
+  opacity: 0.6; 
+}
+
+.dd-item.drop-before { 
+  box-shadow: 0 -2px 0 0 var(--primary) inset; 
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(0,0,0,0.2);
+  display: inline-block;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.grip { 
+  cursor: grab; 
+  color: var(--text-secondary); 
+  padding: 0 0.25rem; 
+  transition: color var(--transition-fast); 
+}
+
+.grip:hover { 
+  color: var(--text); 
+}
+
+.grip:active { 
+  cursor: grabbing; 
+  color: var(--primary); 
+}
+
+.dd-item .label { 
+  flex: 0 1 auto; 
+}
+
+.dd-item input[type="checkbox"] {
+  margin-right: 0.25rem;
+}
+
+.grow { 
+  flex: 1 1 auto; 
+}
+
+/* Small icon buttons within list items */
+.icon-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 0;
+  padding: 0.25rem 0.375rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.icon-btn:hover { 
+  background: var(--surface-2); 
+  color: var(--text); 
+}
+
+.icon-btn:active { 
+  transform: scale(0.95); 
+}
+
+.icon-btn[disabled] { 
+  opacity: 0.4; 
+  cursor: not-allowed; 
+}
+
+/* Add new option section */
+.dd-add { 
+  display: grid; 
+  gap: 0.5rem; 
+}
+
+.dd-add-row { 
+  display: flex; 
+  gap: 0.625rem; 
+  align-items: center; 
+}
+
+.dd-input {
+  flex: 1;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.dd-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 3px rgba(47,129,247,0.1);
+}
+
+/* Color swatches for option customization */
+.swatches { 
+  display: flex; 
+  gap: 0.5rem; 
+  flex-wrap: wrap; 
+}
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-1), 0 0 0 1px rgba(0,0,0,0.2) inset;
+}
+
+.swatch:hover { 
+  transform: scale(1.1); 
+}
+
+.swatch.selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--panel) inset, 0 0 0 4px var(--primary);
+  transform: scale(1.05);
+}
+
+.dd-actions { 
+  display: flex; 
+  gap: 0.5rem; 
+  justify-content: flex-end; 
+  margin-top: 0.5rem; 
+}
+
+/* Filter and sort option lists */
+.filter-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.25rem; 
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background var(--transition-fast);
+}
+
+.filter-option:hover { 
+  background: var(--surface-2); 
+}
+
+.filter-option input[type="checkbox"], 
+.filter-option input[type="radio"] { 
+  cursor: pointer; 
+}
+
+.sort-direction {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+  margin-left: auto;
+  font-size: 0.8125rem;
+  transition: all var(--transition-fast);
+}
+
+.sort-direction:hover { 
+  background: var(--surface-2); 
+}
+
+/* Inline edit row inside dropdown list */
+.dd-edit { 
+  display: grid; 
+  gap: 0.4rem; 
+  width: 100%; 
+}
+
+.dd-edit .dd-actions { 
+  justify-content: flex-start; 
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   Mobile-friendly layout adjustments
+   ============================================ */
+@media (max-width: 900px) {
+  .grid { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  
+  .field { 
+    grid-column: span 1; 
+  }
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+   Reusable animation keyframes
+   ============================================ */
+
+/* Shimmer effect for loading states */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.loading {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(90deg, var(--surface-1) 0%, var(--surface-3) 50%, var(--surface-1) 100%);
+  background-size: 1000px 100%;
+}
+
+/* Fade in from bottom animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp var(--transition-base) ease-out;
+}
+
+/* ============================================
+   ACCESSIBILITY
+   Focus states and keyboard navigation
+   ============================================ */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   GLOBAL TRANSITIONS
+   Smooth theme transitions across all elements
+   ============================================ */
+
+/* Default transition for color-related properties */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: var(--transition-fast);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Override for interactive elements that need all properties */
+.dd-menu, .chip, .btn, input, textarea, select,
+.icon-btn-toolbar, .tab, .badge, .dd-item {
+  transition-property: all;
+}
+
+/* ============================================
+   END OF STYLESHEET
+   ============================================ */
