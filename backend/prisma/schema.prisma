@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // hashed with bcrypt
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions    Session[]
+  tasks       Task[]
+  preferences UserPreferences?
+
+  @@index([email])
+}
+
+// Session model for JWT tokens
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// Task model - main entity
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  done        Boolean  @default(false)
+  deadline    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  statuses TaskStatus[]
+  projects TaskProject[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Status options (e.g., "To Do", "In Progress", "Done")
+model StatusOption {
+  id        String   @id @default(uuid())
+  value     String   @unique
+  color     String   // hex color
+  order     Int      // for sorting
+  createdAt DateTime @default(now())
+
+  tasks TaskStatus[]
+
+  @@index([order])
+}
+
+// Project options (e.g., "Work", "Personal", "Shopping")
+model ProjectOption {
+  id        String   @id @default(uuid())
+  value     String   @unique
+  color     String   // hex color
+  order     Int      // for sorting
+  createdAt DateTime @default(now())
+
+  tasks TaskProject[]
+
+  @@index([order])
+}
+
+// Many-to-many: Task <-> StatusOption
+model TaskStatus {
+  id             String   @id @default(uuid())
+  taskId         String
+  statusOptionId String
+  createdAt      DateTime @default(now())
+
+  task         Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  statusOption StatusOption @relation(fields: [statusOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, statusOptionId])
+  @@index([taskId])
+  @@index([statusOptionId])
+}
+
+// Many-to-many: Task <-> ProjectOption
+model TaskProject {
+  id              String   @id @default(uuid())
+  taskId          String
+  projectOptionId String
+  createdAt       DateTime @default(now())
+
+  task          Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  projectOption ProjectOption @relation(fields: [projectOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, projectOptionId])
+  @@index([taskId])
+  @@index([projectOptionId])
+}
+
+// User preferences (columns, sorting, etc.)
+model UserPreferences {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  columns   Json     // array of column configurations
+  sortField String   @default("created")
+  sortOrder String   @default("desc")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
