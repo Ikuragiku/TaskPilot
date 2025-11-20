@@ -6,7 +6,7 @@ import './Hub.css';
 const Hub: React.FC = () => {
   const { logout } = useAuthStore();
   // Abstract white SVG icons for each module
-  // Taskboard-style abstract white SVG icons for each module
+  // Dashboard-style abstract white SVG icons for each module
   const icons = {
     Tasks: (
       <svg width="64" height="64" viewBox="0 0 32 32" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -19,7 +19,6 @@ const Hub: React.FC = () => {
 
   const modules = [
     { to: '/tasks', title: 'Tasks', desc: 'Manage your tasks and projects' },
-    { to: '/groceries', title: 'Groceries', desc: 'Grocery shopping list' },
     { to: '/projects', title: 'Projects', desc: 'Project boards and organization' },
     { to: '/statuses', title: 'Statuses', desc: 'Manage status options' },
     { to: '/calendar', title: 'Calendar', desc: 'View tasks on a calendar' },

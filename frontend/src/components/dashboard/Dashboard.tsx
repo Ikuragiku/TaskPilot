@@ -1,8 +1,8 @@
 /**
- * Taskboard Component
+ * Dashboard Component
  *
  * Main workspace for TaskPilot. Handles task CRUD, filtering, sorting, tab management, and option editing.
- * Integrates all Taskboard UI components and manages state, persistence, and server sync.
+ * Integrates all dashboard UI components and manages state, persistence, and server sync.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
@@ -22,13 +22,13 @@ import { FilterDropdown } from './FilterDropdown';
 import { SortDropdown } from './SortDropdown';
 import { AddTabDropdown } from './AddTabDropdown';
 import { TabContextMenu } from './TabContextMenu';
-import '../../styles/taskboard.css';
+import '../../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * Renders the main taskboard UI, including tabs, toolbar, table, and dropdowns.
+ * Renders the main dashboard UI, including tabs, toolbar, table, and dropdowns.
  */
-export const Taskboard: React.FC = () => {
+export const Dashboard: React.FC = () => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
