@@ -23,12 +23,14 @@ import { SortDropdown } from './SortDropdown';
 import { AddTabDropdown } from './AddTabDropdown';
 import { TabContextMenu } from './TabContextMenu';
 import '../../styles/dashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Renders the main dashboard UI, including tabs, toolbar, table, and dropdowns.
  */
 export const Dashboard: React.FC = () => {
   const { logout } = useAuthStore();
+  const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: statusOptions = [] } = useStatusOptions();
   const { data: projectOptions = [] } = useProjectOptions();
@@ -228,6 +230,13 @@ export const Dashboard: React.FC = () => {
     <div>
       <header className="app-header">
         <div className="logout-wrap">
+          <button className="btn small hub-btn" onClick={() => navigate('/')} title="Go to Hub" style={{marginRight: '0.5rem'}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="3" y="7" width="18" height="10" rx="3" stroke="currentColor" strokeWidth="2" fill="none"/>
+              <line x1="7" y1="12" x2="17" y2="12" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+            Hub
+          </button>
           <button className="btn small logout-btn" onClick={handleLogout}>
             <svg
               width="14"
@@ -359,8 +368,7 @@ export const Dashboard: React.FC = () => {
                           if (!row) return;
                           const editableCols = columns.filter(col => col === 'name' || col === 'description' || col === 'status' || col === 'deadline' || col === 'project');
                           const colName = editableCols[c];
-                          let dataField = colName;
-                          if (colName === 'name') dataField = 'title';
+                            let dataField = colName;
                           const cell = Array.from(row.children).find(td => td.getAttribute('data-field') === dataField);
                           if (cell) {
                             (cell as HTMLElement).focus();
