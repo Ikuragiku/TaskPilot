@@ -1,6 +1,6 @@
-# TaskPilot
+# Organize-me
 
-TaskPilot is a full-stack productivity dashboard for managing tasks, projects, and statuses. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
+Organize-me is a full-stack productivity dashboard for managing tasks, projects, and statuses. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
 
 ## Features
 - Task, project, and status management
@@ -23,8 +23,8 @@ TaskPilot is a full-stack productivity dashboard for managing tasks, projects, a
 ### Installation
 1. Clone the repository:
    ```powershell
-   git clone https://github.com/ikuragiku/taskpilot.git
-   cd TaskPilot
+   git clone https://github.com/yourusername/Organize-me.git
+   cd Organize-me
    ```
 2. Install dependencies for both frontend and backend:
    ```powershell
