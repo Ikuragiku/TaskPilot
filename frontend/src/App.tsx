@@ -10,8 +10,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoginPage } from './components/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { Dashboard } from './components/dashboard/Dashboard';
+import { Taskboard } from './components/taskboard/Taskboard';
 import Hub from './components/hub/Hub';
+import { Groceries } from './components/groceries/Groceries';
 import FadeRoute from './components/FadeRoute';
 // Global styles are imported per-page to avoid conflicts
 
@@ -45,7 +46,15 @@ function AppRoutes() {
           path="/tasks"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Taskboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/groceries"
+          element={
+            <ProtectedRoute>
+              <Groceries />
             </ProtectedRoute>
           }
         />

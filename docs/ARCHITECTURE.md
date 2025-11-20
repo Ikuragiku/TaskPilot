@@ -6,7 +6,7 @@ This document provides a detailed breakdown of the Organize-me system architectu
 - **Entry Point:** `main.tsx` bootstraps the React app.
 - **Routing:** Managed by React Router v6 for page navigation and protected routes.
 - **State Management:** Zustand store for authentication and UI state; TanStack Query for server state.
-- **Components:** Modular, reusable components for dashboard, tabs, task table, dropdowns, and context menus.
+- **Components:** Modular, reusable components for Taskboard, tabs, task table, dropdowns, and context menus.
 - **Services:** API and WebSocket services for backend communication.
 - **Persistence:** UI state (tabs, filters, sorts) stored in localStorage.
 

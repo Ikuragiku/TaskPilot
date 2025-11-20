@@ -1,7 +1,7 @@
 /**
  * FilterChips Component
  *
- * Renders active filter and sort chips for the dashboard. Supports removal, clearing, and adding filters/sorts.
+ * Renders active filter and sort chips for the Taskboard. Supports removal, clearing, and adding filters/sorts.
  */
 import React from 'react';
 import { Filters } from '../../utils/taskFilters';

@@ -1,7 +1,7 @@
 /**
  * TaskToolbar Component
  *
- * Renders toolbar actions for the dashboard: add task, filter, sort, and search input.
+ * Renders toolbar actions for the taskboard: add task, filter, sort, and search input.
  */
 import React from 'react';
 
@@ -15,6 +15,7 @@ interface TaskToolbarProps {
   hasActiveSorts?: boolean;
   isFilterOpen?: boolean;
   isSortOpen?: boolean;
+  addLabel?: string;
 }
 
 /**
@@ -29,17 +30,18 @@ export const TaskToolbar: React.FC<TaskToolbarProps> = ({
   hasActiveFilters = false,
   hasActiveSorts = false,
   isFilterOpen = false,
-  isSortOpen = false
+  isSortOpen = false,
+  addLabel = '+ Add task'
 }) => {
   return (
     <div className="table-actions">
       <button
         id="addRowBtn"
         className="btn primary"
-        title="Add task"
+        title={addLabel}
         onClick={onAddTask}
       >
-        + Add task
+        {addLabel}
       </button>
       <button
         id="filterBtn"

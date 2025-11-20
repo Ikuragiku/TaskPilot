@@ -1,6 +1,6 @@
 # System Overview
 
-Organize-me is a full-stack productivity dashboard designed to help users manage tasks, projects, and statuses efficiently. The system is built with a modular architecture, separating concerns between frontend, backend, and database layers for scalability and maintainability.
+Organize-me is a full-stack productivity Taskboard designed to help users manage tasks, projects, and statuses efficiently. The system is built with a modular architecture, separating concerns between frontend, backend, and database layers for scalability and maintainability.
 
 ## Main Features
 - Task, project, and status management

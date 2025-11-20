@@ -1,6 +1,6 @@
 # TaskPilot
 
-TaskPilot is a full-stack productivity dashboard for managing tasks, projects, and statuses. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
+TaskPilot is a full-stack productivity Taskboard for managing tasks, projects, and statuses. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
 
 ## Features
 - Task, project, and status management
