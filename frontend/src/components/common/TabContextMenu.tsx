@@ -17,7 +17,7 @@ type Props = {
 /**
  * Renders a context menu for tab actions (currently delete only).
  */
-export const TabContextMenu: React.FC<Props> = ({ x, y, tab, onDelete, onClose }) => {
+export const TabContextMenu: React.FC<Props> = ({ x, y, tab: _tab, onDelete, onClose }) => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);

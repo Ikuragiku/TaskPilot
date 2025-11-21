@@ -10,7 +10,7 @@
  */
 export interface User {
   id: string;
-  email: string;
+  username: string;
   name?: string;
   createdAt: string;
 }
@@ -27,7 +27,7 @@ export interface AuthResponse {
  * Credentials required for user login.
  */
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -35,7 +35,7 @@ export interface LoginCredentials {
  * Credentials required for user registration.
  */
 export interface RegisterCredentials {
-  email: string;
+  username: string;
   password: string;
   name?: string;
 }
@@ -110,6 +110,34 @@ export interface TaskFilters {
   search?: string;
   statusIds?: string[];
   projectIds?: string[];
+}
+
+// Grocery types (local-storage backed)
+/**
+ * Represents a grocery item stored locally.
+ */
+export interface Grocery {
+  id: string;
+  title: string; // name of the grocery
+  menge?: string; // quantity text
+  kategorieIds?: string[]; // references to grocery categories
+  done?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateGroceryInput {
+  title: string;
+  menge?: string;
+  kategorieIds?: string[];
+  done?: boolean;
+}
+
+export interface UpdateGroceryInput {
+  title?: string;
+  menge?: string;
+  kategorieIds?: string[];
+  done?: boolean;
 }
 
 // API Response

@@ -15,6 +15,10 @@ type Props = {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   onClose: () => void;
+  statusLabel?: string;
+  projectLabel?: string;
+  showStatus?: boolean;
+  showProject?: boolean;
 };
 
 /**
@@ -26,7 +30,11 @@ export const FilterDropdown: React.FC<Props> = ({
   projectOptions,
   filters,
   setFilters,
-  onClose
+  onClose,
+  statusLabel = 'Filter by Status',
+  projectLabel = 'Filter by Project',
+  showStatus = true,
+  showProject = true,
 }) => {
   const pos = useMemo(() => {
     if (!anchorEl) return { top: 0, left: 0 };
@@ -64,40 +72,44 @@ export const FilterDropdown: React.FC<Props> = ({
     <>
       <div className="dropdown-backdrop" onClick={onClose} />
       <div className="dd-menu filter-menu" style={{ position: 'absolute', top: pos.top, left: pos.left }}>
-        <div className="dd-sec">
-          <p className="dd-title">Filter by Status</p>
-          <div className="filter-list">
-            {statusOptions.length === 0 && <p className="muted">No status options</p>}
-            {statusOptions.map(s => (
-              <label key={s.id} className="filter-option">
-                <input
-                  type="checkbox"
-                  checked={filters.status.includes(s.value)}
-                  onChange={e => toggleStatus(s.value, e.currentTarget.checked)}
-                />
-                <span className="dot" style={{ background: s.color }} />
-                <span>{s.value}</span>
-              </label>
-            ))}
+        {showStatus && (
+          <div className="dd-sec">
+            <p className="dd-title">{statusLabel}</p>
+            <div className="filter-list">
+              {statusOptions.length === 0 && <p className="muted">No status options</p>}
+              {statusOptions.map(s => (
+                <label key={s.id} className="filter-option">
+                  <input
+                    type="checkbox"
+                    checked={filters.status.includes(s.value)}
+                    onChange={e => toggleStatus(s.value, e.currentTarget.checked)}
+                  />
+                  <span className="dot" style={{ background: s.color }} />
+                  <span>{s.value}</span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="dd-sec">
-          <p className="dd-title">Filter by Project</p>
-          <div className="filter-list">
-            {projectOptions.length === 0 && <p className="muted">No project options</p>}
-            {projectOptions.map(p => (
-              <label key={p.id} className="filter-option">
-                <input
-                  type="checkbox"
-                  checked={filters.project.includes(p.value)}
-                  onChange={e => toggleProject(p.value, e.currentTarget.checked)}
-                />
-                <span className="dot" style={{ background: p.color }} />
-                <span>{p.value}</span>
-              </label>
-            ))}
+        )}
+        {showProject && (
+          <div className="dd-sec">
+            <p className="dd-title">{projectLabel}</p>
+            <div className="filter-list">
+              {projectOptions.length === 0 && <p className="muted">No project options</p>}
+              {projectOptions.map(p => (
+                <label key={p.id} className="filter-option">
+                  <input
+                    type="checkbox"
+                    checked={filters.project.includes(p.value)}
+                    onChange={e => toggleProject(p.value, e.currentTarget.checked)}
+                  />
+                  <span className="dot" style={{ background: p.color }} />
+                  <span>{p.value}</span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <div className="dd-sec">
           <p className="dd-title">Filter by Done</p>
           <div className="filter-list">

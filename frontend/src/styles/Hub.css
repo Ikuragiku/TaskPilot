@@ -1,4 +1,15 @@
-/* Hub.css updated to match Dashboard styles */
+/*
+ * Hub.css
+ *
+ * Styles for the app Hub (module tiles) used on the entry/dashboard page.
+ * - Provides a centered grid of square tiles for quick navigation.
+ * - Relies on global CSS variables (e.g. `--panel`, `--text`, `--primary`, `--border-subtle`,
+ *   `--radius-lg`, `--shadow-*`, `--transition-*`) defined in the app theme.
+ * - Tiles are responsive: 4 columns on wide screens, 2 on medium, 1 on small devices.
+ *
+ * Keep these rules focused on layout and tile appearance; module-specific tile
+ * content (icons/text) is rendered by the `Hub` React component.
+ */
 
 .hub-container {
   display: flex;

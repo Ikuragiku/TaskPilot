@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 
 interface JwtPayload {
   userId: string;
-  email: string;
+  username: string;
 }
 
 /**
@@ -43,7 +43,7 @@ export const authenticate = async (
     // Attach user to request
     req.user = {
       id: decoded.userId,
-      email: decoded.email,
+      username: decoded.username,
     };
 
     next();
@@ -74,14 +74,14 @@ export const authenticate = async (
 /**
  * Generate JWT token for user
  * @param userId - User's unique ID
- * @param email - User's email
+ * @param username - User's username
  * @returns JWT token string
  */
-export const generateToken = (userId: string, email: string): string => {
+export const generateToken = (userId: string, username: string): string => {
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
   
   return jwt.sign(
-    { userId, email } as JwtPayload,
+    { userId, username } as JwtPayload,
     JWT_SECRET,
     { expiresIn } as jwt.SignOptions
   );

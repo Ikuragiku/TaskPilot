@@ -6,13 +6,14 @@
  */
 import api from './api';
 import { StatusOption, ProjectOption, ApiResponse } from '../types';
+import { API_PATHS } from '../constants/apiPaths';
 
 /**
  * Get all status options
  */
 export const getStatusOptions = async (): Promise<StatusOption[]> => {
   const { data } = await api.get<ApiResponse<StatusOption[]>>(
-    '/api/options/status'
+    `${API_PATHS.OPTIONS}/status`
   );
   
   if (data.success && data.data) {
@@ -30,7 +31,7 @@ export const createStatusOption = async (
   color: string
 ): Promise<StatusOption> => {
   const { data } = await api.post<ApiResponse<StatusOption>>(
-    '/api/options/status',
+    `${API_PATHS.OPTIONS}/status`,
     { value, color }
   );
   
@@ -49,7 +50,7 @@ export const updateStatusOption = async (
   updates: { value?: string; color?: string; order?: number }
 ): Promise<StatusOption> => {
   const { data } = await api.put<ApiResponse<StatusOption>>(
-    `/api/options/status/${id}`,
+    `${API_PATHS.OPTIONS}/status/${id}`,
     updates
   );
   
@@ -64,7 +65,7 @@ export const updateStatusOption = async (
  * Delete a status option
  */
 export const deleteStatusOption = async (id: string): Promise<void> => {
-  const { data } = await api.delete<ApiResponse>(`/api/options/status/${id}`);
+  const { data } = await api.delete<ApiResponse>(`${API_PATHS.OPTIONS}/status/${id}`);
   
   if (!data.success) {
     throw new Error(data.error || 'Failed to delete status option');
@@ -76,7 +77,7 @@ export const deleteStatusOption = async (id: string): Promise<void> => {
  */
 export const getProjectOptions = async (): Promise<ProjectOption[]> => {
   const { data } = await api.get<ApiResponse<ProjectOption[]>>(
-    '/api/options/project'
+    `${API_PATHS.OPTIONS}/project`
   );
   
   if (data.success && data.data) {
@@ -94,7 +95,7 @@ export const createProjectOption = async (
   color: string
 ): Promise<ProjectOption> => {
   const { data } = await api.post<ApiResponse<ProjectOption>>(
-    '/api/options/project',
+    `${API_PATHS.OPTIONS}/project`,
     { value, color }
   );
   
@@ -113,7 +114,7 @@ export const updateProjectOption = async (
   updates: { value?: string; color?: string; order?: number }
 ): Promise<ProjectOption> => {
   const { data } = await api.put<ApiResponse<ProjectOption>>(
-    `/api/options/project/${id}`,
+    `${API_PATHS.OPTIONS}/project/${id}`,
     updates
   );
   
@@ -128,7 +129,7 @@ export const updateProjectOption = async (
  * Delete a project option
  */
 export const deleteProjectOption = async (id: string): Promise<void> => {
-  const { data } = await api.delete<ApiResponse>(`/api/options/project/${id}`);
+  const { data } = await api.delete<ApiResponse>(`${API_PATHS.OPTIONS}/project/${id}`);
   
   if (!data.success) {
     throw new Error(data.error || 'Failed to delete project option');

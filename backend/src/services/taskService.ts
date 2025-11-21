@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import prisma from '../prismaClient';
 import { CreateTaskDto, UpdateTaskDto } from '../types';
-
-const prisma = new PrismaClient();
 
 /**
  * Get all tasks for a user with filters
@@ -113,6 +112,20 @@ export const getTaskById = async (taskId: string, userId: string) => {
  * Create a new task
  */
 export const createTask = async (userId: string, data: CreateTaskDto) => {
+  // Validate provided status and project IDs to avoid FK errors
+  let validStatusIds: string[] | undefined = undefined;
+  let validProjectIds: string[] | undefined = undefined;
+
+  if (data.statusIds && data.statusIds.length > 0) {
+    const found = await prisma.statusOption.findMany({ where: { id: { in: data.statusIds } }, select: { id: true } });
+    validStatusIds = found.map((f) => f.id);
+  }
+
+  if (data.projectIds && data.projectIds.length > 0) {
+    const found = await prisma.projectOption.findMany({ where: { id: { in: data.projectIds } }, select: { id: true } });
+    validProjectIds = found.map((f) => f.id);
+  }
+
   const task = await prisma.task.create({
     data: {
       title: data.title,
@@ -120,16 +133,16 @@ export const createTask = async (userId: string, data: CreateTaskDto) => {
       done: data.done ?? false,
       deadline: data.deadline ? new Date(data.deadline) : undefined,
       userId,
-      statuses: data.statusIds
+      statuses: validStatusIds
         ? {
-            create: data.statusIds.map((statusId) => ({
+            create: validStatusIds.map((statusId) => ({
               statusOptionId: statusId,
             })),
           }
         : undefined,
-      projects: data.projectIds
+      projects: validProjectIds
         ? {
-            create: data.projectIds.map((projectId) => ({
+            create: validProjectIds.map((projectId) => ({
               projectOptionId: projectId,
             })),
           }
@@ -180,7 +193,7 @@ export const updateTask = async (
   }
 
   // Update task with transaction
-  const task = await prisma.$transaction(async (tx: PrismaClient) => {
+  const task = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     // Update basic fields
     await tx.task.update({
       where: { id: taskId },
@@ -199,10 +212,14 @@ export const updateTask = async (
         where: { taskId },
       });
 
-      // Create new statuses
-      if (data.statusIds.length > 0) {
+      // Validate provided status IDs to avoid FK errors
+      const validStatuses = data.statusIds && data.statusIds.length > 0
+        ? (await tx.statusOption.findMany({ where: { id: { in: data.statusIds } }, select: { id: true } })).map((s) => s.id)
+        : [];
+
+      if (validStatuses.length > 0) {
         await tx.taskStatus.createMany({
-          data: data.statusIds.map((statusId) => ({
+          data: validStatuses.map((statusId) => ({
             taskId,
             statusOptionId: statusId,
           })),
@@ -217,10 +234,15 @@ export const updateTask = async (
         where: { taskId },
       });
 
-      // Create new projects
-      if (data.projectIds.length > 0) {
+      // Validate provided project IDs to avoid FK errors (they might have been deleted)
+      const validProjects = data.projectIds && data.projectIds.length > 0
+        ? (await tx.projectOption.findMany({ where: { id: { in: data.projectIds } }, select: { id: true } })).map((p) => p.id)
+        : [];
+
+      // Create new projects only for valid IDs
+      if (validProjects.length > 0) {
         await tx.taskProject.createMany({
-          data: data.projectIds.map((projectId) => ({
+          data: validProjects.map((projectId) => ({
             taskId,
             projectOptionId: projectId,
           })),

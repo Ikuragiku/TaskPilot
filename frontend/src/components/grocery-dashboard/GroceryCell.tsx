@@ -3,18 +3,18 @@
  *
  * Renders a single cell in the tasks table. Handles editing, selection, tab navigation, and option dropdowns.
  */
-import React, { useRef, useState } from 'react';
-import { Task } from '../../types';
-import { formatDate } from '../../utils/dateUtils';
+import React, { useState } from 'react';
+import { Grocery, ProjectOption } from '../../types';
+import { readableTextColor, rgbaFromHex } from '../../utils/colorUtils';
 
 type Props = {
   col: string;
-  task: Task;
+  task: Grocery;
   updateTaskField: (id: string, input: any) => Promise<void>;
-  onOpenOptionDropdown: (cell: HTMLElement, type: 'status' | 'project', task: Task) => void;
+  onOpenOptionDropdown: (cell: HTMLElement, type: 'status' | 'project', task: Grocery | any) => void;
   rowIdx: number;
-  colIdx: number;
   editableCols: string[];
+  groceryCategories?: ProjectOption[];
   totalRows: number;
   focusCell: (row: number, col: number) => void;
 };
@@ -22,7 +22,8 @@ type Props = {
 /**
  * Renders a table cell for a given column and task. Supports inline editing, dropdowns, and keyboard navigation.
  */
-export const TaskCell: React.FC<Props> = ({ col, task, updateTaskField, onOpenOptionDropdown, rowIdx, colIdx, editableCols, totalRows, focusCell }) => {
+export const TaskCell: React.FC<Props> = ({ col, task, updateTaskField, onOpenOptionDropdown, rowIdx, editableCols, totalRows, focusCell, groceryCategories = [] }) => {
+  const [projectOpen, setProjectOpen] = useState(false);
   if (col === 'done') {
     return (
       <td key={col} className="col-done">
@@ -107,31 +108,33 @@ export const TaskCell: React.FC<Props> = ({ col, task, updateTaskField, onOpenOp
         }}
         onBlur={async (e) => {
           const newValue = e.currentTarget.textContent || '';
-          if (newValue.trim() !== (task.description || '')) {
-            await updateTaskField(task.id, { description: newValue.trim() });
+          if (newValue.trim() !== (task.menge || '')) {
+            await updateTaskField(task.id, { menge: newValue.trim() });
           }
         }}
       >
-        {task.description || ''}
+        {task.menge || ''}
       </td>
     );
   }
 
-  const [statusOpen, setStatusOpen] = useState(false);
-  if (col === 'status') {
+  // 'menge' is used by Grocery board as a text field mapped to description
+  if (col === 'menge') {
     return (
       <td
         key={col}
-        data-field="status"
+        contentEditable
+        suppressContentEditableWarning
+        data-field="description"
         tabIndex={0}
-        onClick={(e) => {
-          setStatusOpen(true);
-          onOpenOptionDropdown(e.currentTarget, 'status', task);
+        onMouseDown={(e) => {
+          if (e.button === 2) {
+            e.preventDefault();
+          }
         }}
         onKeyDown={(e) => {
           if (e.key === 'Tab') {
             e.preventDefault();
-            setStatusOpen(false);
             let nextColIdx = editableCols.indexOf(col) + 1;
             let nextRowIdx = rowIdx;
             if (nextColIdx >= editableCols.length) {
@@ -143,99 +146,23 @@ export const TaskCell: React.FC<Props> = ({ col, task, updateTaskField, onOpenOp
             }
             focusCell(nextRowIdx, nextColIdx);
           }
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            if (!statusOpen) {
-              setStatusOpen(true);
-              onOpenOptionDropdown(e.currentTarget, 'status', task);
-            } else {
-              setStatusOpen(false);
-              // simulate closing: blur the cell
-              (e.currentTarget as HTMLElement).blur();
-            }
+        }}
+        onBlur={async (e) => {
+          const newValue = e.currentTarget.textContent || '';
+          if (newValue.trim() !== (task.menge || '')) {
+            await updateTaskField(task.id, { menge: newValue.trim() });
           }
         }}
       >
-        {task.statuses && task.statuses.length > 0 ? (
-          task.statuses.map(s => (
-            <span
-              key={s.id}
-              className="badge"
-              style={{
-                background: `${s.color}20`,
-                borderColor: `${s.color}50`,
-                color: s.color
-              }}
-            >
-              {s.value}
-            </span>
-          ))
-        ) : (
-          <span className="muted">Select…</span>
-        )}
+        {task.menge || ''}
       </td>
     );
   }
 
-  const deadlineInputRef = useRef<HTMLInputElement>(null);
-  const [deadlineOpen, setDeadlineOpen] = useState(false);
-  if (col === 'deadline') {
-    return (
-      <td
-        key={col}
-        className="deadline-cell"
-        data-field="deadline"
-        tabIndex={0}
-        onClick={(e) => {
-          setDeadlineOpen(true);
-          const input = e.currentTarget.querySelector('input') as HTMLInputElement;
-          input?.showPicker?.();
-          input?.focus();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Tab') {
-            e.preventDefault();
-            setDeadlineOpen(false);
-            let nextColIdx = editableCols.indexOf(col) + 1;
-            let nextRowIdx = rowIdx;
-            if (nextColIdx >= editableCols.length) {
-              nextColIdx = 0;
-              nextRowIdx = rowIdx + 1;
-              if (nextRowIdx >= totalRows) {
-                nextRowIdx = 0;
-              }
-            }
-            focusCell(nextRowIdx, nextColIdx);
-          }
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            if (!deadlineOpen) {
-              setDeadlineOpen(true);
-              deadlineInputRef.current?.showPicker?.();
-              deadlineInputRef.current?.focus();
-            } else {
-              setDeadlineOpen(false);
-              deadlineInputRef.current?.blur();
-            }
-          }
-        }}
-      >
-        {formatDate(task.deadline)}
-        <input
-          ref={deadlineInputRef}
-          type="date"
-          className="deadline-picker-hidden"
-          value={task.deadline ? new Date(task.deadline).toISOString().slice(0, 10) : ''}
-          onChange={async (e) => {
-            await updateTaskField(task.id, { deadline: e.target.value || null });
-          }}
-        />
-      </td>
-    );
-  }
+  // remove status/deadline/project columns for Grocery cell — Grocery uses only done, name, menge, kategorie
 
-  const [projectOpen, setProjectOpen] = useState(false);
-  if (col === 'project') {
+  // 'kategorie' for Grocery board maps to project behaviour (single/multi category badges)
+  if (col === 'kategorie') {
     return (
       <td
         key={col}
@@ -272,20 +199,23 @@ export const TaskCell: React.FC<Props> = ({ col, task, updateTaskField, onOpenOp
           }
         }}
       >
-        {task.projects && task.projects.length > 0 ? (
-          task.projects.map(p => (
-            <span
-              key={p.id}
-              className="badge"
-              style={{
-                background: `${p.color}20`,
-                borderColor: `${p.color}50`,
-                color: p.color
-              }}
-            >
-              {p.value}
-            </span>
-          ))
+        {task.kategorieIds && task.kategorieIds.length > 0 ? (
+          task.kategorieIds.map(id => {
+            const cat = groceryCategories.find(c => c.id === id);
+            return (
+              <span
+                key={id}
+                className="badge muted"
+                style={{
+                  background: cat?.color ? rgbaFromHex(cat.color, 0.22) : undefined,
+                  borderColor: cat?.color ? rgbaFromHex(cat.color, 0.45) : undefined,
+                  color: cat?.color ? readableTextColor(cat.color) : undefined,
+                }}
+              >
+                {cat ? cat.value : id}
+              </span>
+            );
+          })
         ) : (
           <span className="muted">Select…</span>
         )}

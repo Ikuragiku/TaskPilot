@@ -1,5 +1,16 @@
 # Organize-me
 
+-**Version:** v0.2.6
+
+## What's new in v0.2.6
+- Grocery domain migrated to the database and fully decoupled from Tasks (new Prisma models).
+- Frontend: Grocery UI split from TaskDashboard and uses dedicated hooks/services (`useGroceries`, `groceryApi`).
+- Backend: Prisma schema updated; authentication now uses `username` instead of `email`.
+- Centralized frontend react-query keys and API path constants for more predictable cache behavior.
+- Optimistic UI updates for category deletions and immediate cache updates after edits.
+
+> Note: The database schema changed in this release. If you have an existing local DB you will need to reset and reseed it (see `backend/prisma/seed.ts` and the `docs` section below).
+
 Organize-me is a full-stack productivity dashboard for managing tasks, projects, and statuses. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
 
 ## Features
@@ -61,6 +72,17 @@ Or start manually:
 
 ## Documentation
 All major files are documented with top-level and function comments for easy onboarding and maintainability.
+
+Migration & Upgrade Notes
+- After pulling v0.2.6, run the following in `backend` to reset and reseed a local development DB (this is destructive):
+
+```powershell
+npx prisma migrate reset --force
+npx prisma generate
+npm run prisma:seed
+```
+
+If you need to preserve data, perform a careful migration or export your data before resetting.
 
 ## License
 MIT

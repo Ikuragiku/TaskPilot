@@ -10,7 +10,18 @@
  */
 export const formatDate = (dateStr?: string | null): string => {
   if (!dateStr) return '';
-  const d = new Date(dateStr + 'T00:00:00');
+  // Accept either date-only strings (YYYY-MM-DD) or full ISO datetimes.
+  let d: Date;
+  try {
+    if (typeof dateStr === 'string' && dateStr.includes('T')) {
+      d = new Date(dateStr);
+    } else {
+      d = new Date(dateStr + 'T00:00:00');
+    }
+  } catch {
+    return '';
+  }
+  if (Number.isNaN(d.getTime())) return '';
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));

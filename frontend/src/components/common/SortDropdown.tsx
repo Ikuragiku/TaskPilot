@@ -12,6 +12,7 @@ type Props = {
   sorts: Sort[];
   setSorts: React.Dispatch<React.SetStateAction<Sort[]>>;
   onClose: () => void;
+  fields?: readonly string[];
 };
 
 const FIELDS = ['title', 'status', 'project', 'deadline', 'done'] as const;
@@ -19,7 +20,7 @@ const FIELDS = ['title', 'status', 'project', 'deadline', 'done'] as const;
 /**
  * Renders the sort dropdown UI for tasks. Allows field selection and direction control.
  */
-export const SortDropdown: React.FC<Props> = ({ anchorEl, sorts, setSorts, onClose }) => {
+export const SortDropdown: React.FC<Props> = ({ anchorEl, sorts, setSorts, onClose, fields }) => {
   const pos = useMemo(() => {
     if (!anchorEl) return { top: 0, left: 0 };
     const rect = anchorEl.getBoundingClientRect();
@@ -50,6 +51,8 @@ export const SortDropdown: React.FC<Props> = ({ anchorEl, sorts, setSorts, onClo
 
   const reset = () => setSorts([]);
 
+  const usedFields = fields || FIELDS;
+
   const content = (
     <>
       <div className="dropdown-backdrop" onClick={onClose} />
@@ -57,7 +60,7 @@ export const SortDropdown: React.FC<Props> = ({ anchorEl, sorts, setSorts, onClo
         <div className="dd-sec">
           <p className="dd-title">Sort by (in order)</p>
           <div className="filter-list">
-            {FIELDS.map(field => {
+            {usedFields.map(field => {
               const existing = sorts.find(s => s.field === field);
               const checked = !!existing;
               const dir: 'asc' | 'desc' = existing?.asc ? 'asc' : 'desc';

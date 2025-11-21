@@ -4,7 +4,7 @@ import { Request } from 'express';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email: string;
+    username: string;
     name?: string;
   };
 }
@@ -36,6 +36,21 @@ export interface UpdateTaskDto {
   deadline?: string; // ISO date string
 }
 
+// Grocery DTOs
+export interface CreateGroceryDto {
+  title: string;
+  menge?: string;
+  categoryIds?: string[];
+  done?: boolean;
+}
+
+export interface UpdateGroceryDto {
+  title?: string;
+  menge?: string | null;
+  categoryIds?: string[];
+  done?: boolean;
+}
+
 // Option types
 export interface CreateOptionDto {
   value: string;
@@ -50,13 +65,13 @@ export interface UpdateOptionDto {
 
 // Auth types
 export interface RegisterDto {
-  email: string;
+  username: string;
   password: string;
   name?: string;
 }
 
 export interface LoginDto {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -64,7 +79,7 @@ export interface AuthResponse {
   token: string;
   user: {
     id: string;
-    email: string;
+    username: string;
     name?: string;
   };
 }

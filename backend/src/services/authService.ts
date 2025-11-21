@@ -4,12 +4,12 @@
  * Handles user registration, login, logout, and session management.
  * Uses Prisma for database access and bcrypt for password hashing.
  */
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prismaClient';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../middleware/auth';
 import { RegisterDto, LoginDto, AuthResponse } from '../types';
 
-const prisma = new PrismaClient(); // Prisma ORM client
+// using shared prisma client
 const SALT_ROUNDS = 10; // bcrypt salt rounds for password hashing
 
 /**
@@ -19,12 +19,10 @@ const SALT_ROUNDS = 10; // bcrypt salt rounds for password hashing
  */
 export const register = async (data: RegisterDto): Promise<AuthResponse> => {
   // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email: data.email },
-  });
+  const existingUser = await prisma.user.findUnique({ where: { username: data.username } });
 
   if (existingUser) {
-    throw new Error('User already exists with this email');
+    throw new Error('User already exists with this username');
   }
 
   // Hash password
@@ -33,14 +31,14 @@ export const register = async (data: RegisterDto): Promise<AuthResponse> => {
   // Create user
   const user = await prisma.user.create({
     data: {
-      email: data.email,
+      username: data.username,
       password: hashedPassword,
       name: data.name,
     },
   });
 
   // Generate token
-  const token = generateToken(user.id, user.email);
+  const token = generateToken(user.id, user.username);
 
   // Save session
   const expiresAt = new Date();
@@ -58,7 +56,7 @@ export const register = async (data: RegisterDto): Promise<AuthResponse> => {
     token,
     user: {
       id: user.id,
-      email: user.email,
+      username: user.username,
       name: user.name || undefined,
     },
   };
@@ -71,23 +69,21 @@ export const register = async (data: RegisterDto): Promise<AuthResponse> => {
  */
 export const login = async (data: LoginDto): Promise<AuthResponse> => {
   // Find user
-  const user = await prisma.user.findUnique({
-    where: { email: data.email },
-  });
+  const user = await prisma.user.findUnique({ where: { username: data.username } });
 
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw new Error('Invalid username or password');
   }
 
   // Verify password
   const isValidPassword = await bcrypt.compare(data.password, user.password);
 
   if (!isValidPassword) {
-    throw new Error('Invalid email or password');
+    throw new Error('Invalid username or password');
   }
 
   // Generate token
-  const token = generateToken(user.id, user.email);
+  const token = generateToken(user.id, user.username);
 
   // Save session
   const expiresAt = new Date();
@@ -105,7 +101,7 @@ export const login = async (data: LoginDto): Promise<AuthResponse> => {
     token,
     user: {
       id: user.id,
-      email: user.email,
+      username: user.username,
       name: user.name || undefined,
     },
   };
@@ -128,7 +124,7 @@ export const getUserById = async (userId: string) => {
     where: { id: userId },
     select: {
       id: true,
-      email: true,
+      username: true,
       name: true,
       createdAt: true,
     },

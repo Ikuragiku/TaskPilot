@@ -1,8 +1,8 @@
 /**
- * Dashboard Component
+ * TaskDashboard Component
  *
  * Main workspace for TaskPilot. Handles task CRUD, filtering, sorting, tab management, and option editing.
- * Integrates all dashboard UI components and manages state, persistence, and server sync.
+ * Integrates all TaskDashboard UI components and manages state, persistence, and server sync.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
@@ -12,23 +12,23 @@ import { Task } from '../../types';
 import { filterTasks, Filters } from '../../utils/taskFilters';
 import { sortTasks, Sort } from '../../utils/taskSort';
 import { COLUMNS_KEY, TABS_KEY, ACTIVE_TAB_KEY, FILTERS_KEY, SORTS_KEY, DEFAULT_COLUMNS, SEARCH_KEY, SHOW_FILTERS_KEY, SHOW_SORTS_KEY } from '../../utils/constants';
-import { TabsBar } from './TabsBar';
-import { FilterChips } from './FilterChips';
+import { TabsBar } from '../common/TabsBar';
+import { FilterChips } from '../common/FilterChips';
 import { TaskToolbar } from './TaskToolbar';
 import { TaskTableHeader } from './TaskTableHeader';
 import { TaskCell } from './TaskCell';
-import { OptionDropdown } from './OptionDropdown';
-import { FilterDropdown } from './FilterDropdown';
-import { SortDropdown } from './SortDropdown';
-import { AddTabDropdown } from './AddTabDropdown';
-import { TabContextMenu } from './TabContextMenu';
+import { OptionDropdown } from '../common/OptionDropdown';
+import { FilterDropdown } from '../common/FilterDropdown';
+import { SortDropdown } from '../common/SortDropdown';
+import { AddTabDropdown } from '../common/AddTabDropdown';
+import { TabContextMenu } from '../common/TabContextMenu';
 import '../../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * Renders the main dashboard UI, including tabs, toolbar, table, and dropdowns.
+ * Renders the main TaskDashboard UI, including tabs, toolbar, table, and dropdowns.
  */
-export const Dashboard: React.FC = () => {
+export const TaskDashboard: React.FC = () => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
@@ -65,7 +65,9 @@ export const Dashboard: React.FC = () => {
   const [columns, setColumns] = useState<string[]>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(COLUMNS_KEY) || '[]');
-      if (saved.length > 0) {
+      // Validate saved columns only contain known task columns; otherwise fall back to defaults
+      const known = new Set(DEFAULT_COLUMNS);
+      if (Array.isArray(saved) && saved.length > 0 && saved.every((c: string) => known.has(c))) {
         const savedSet = new Set(saved);
         const missing = DEFAULT_COLUMNS.filter(c => !savedSet.has(c));
         return [...saved, ...missing];
@@ -368,8 +370,10 @@ export const Dashboard: React.FC = () => {
                           if (!row) return;
                           const editableCols = columns.filter(col => col === 'name' || col === 'description' || col === 'status' || col === 'deadline' || col === 'project');
                           const colName = editableCols[c];
-                            let dataField = colName;
-                          const cell = Array.from(row.children).find(td => td.getAttribute('data-field') === dataField);
+                            let dataField: string = colName as string;
+                            // map column key 'name' to the cell's data-field 'title'
+                            if (dataField === 'name') dataField = 'title';
+                            const cell = Array.from(row.children).find(td => td.getAttribute('data-field') === dataField);
                           if (cell) {
                             (cell as HTMLElement).focus();
                           }

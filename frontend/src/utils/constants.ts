@@ -15,12 +15,15 @@ export const SHOW_SORTS_KEY = 'organize_me_show_sorts_v1';
 export const DEFAULT_COLUMNS = ['done', 'name', 'description', 'status', 'deadline', 'project'];
 
 export const PALETTE = [
+  { name: 'Dark Gray', color: '#484f58' },
   { name: 'Yellow', color: '#e3b341' },
-  { name: 'Orange', color: '#d29922' },
+  { name: 'Teal', color: '#14b8a6' },
+  { name: 'Cyan', color: '#06b6d4' },
   { name: 'Green', color: '#3fb950' },
   { name: 'Blue', color: '#2f81f7' },
+  { name: 'Navy', color: '#0b5cff' },
   { name: 'Purple', color: '#a371f7' },
   { name: 'Red', color: '#f85149' },
-  { name: 'Light Gray', color: '#c9d1d9' },
-  { name: 'Dark Gray', color: '#484f58' },
+  { name: 'Magenta', color: '#ff4da6' },
+
 ];

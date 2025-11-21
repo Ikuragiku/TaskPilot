@@ -582,7 +582,7 @@ textarea {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 1.5px solid rgba(0,0,0,0.2);
+  border: 1.5px solid rgba(255,255,255,0.12);
   flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
@@ -698,6 +698,26 @@ textarea {
   padding: 0.5rem; /* match input spacing */
   outline: none;
   word-break: break-word;
+}
+
+/* Focus styles for non-contenteditable cells (status, deadline, project)
+   So keyboard navigation (Tab) shows the same gray highlight as name/description */
+.tasks-table td[data-field="status"],
+.tasks-table td[data-field="deadline"],
+.tasks-table td[data-field="project"] {
+  outline: none;
+}
+
+.tasks-table td[data-field="status"]:focus,
+.tasks-table td[data-field="deadline"]:focus,
+.tasks-table td[data-field="project"]:focus {
+  position: relative;
+  z-index: 5;
+  background: var(--surface-2);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  padding: 0.5rem;
+  outline: none;
 }
 
 /* ============================================
@@ -983,7 +1003,7 @@ textarea {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  border: 1.5px solid rgba(0,0,0,0.2);
+  border: 1.5px solid rgba(255,255,255,0.12);
   display: inline-block;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
@@ -1082,7 +1102,7 @@ textarea {
 /* Color swatches for option customization */
 .swatches { 
   display: grid; 
-  grid-template-columns: repeat(4, 24px);
+  grid-template-columns: repeat(5, 24px);
   gap: 0.5rem; 
   justify-content: start;
   width: 100%;

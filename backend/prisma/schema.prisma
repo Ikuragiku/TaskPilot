@@ -13,7 +13,7 @@ datasource db {
 // User model for authentication
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
+  username  String   @unique
   password  String   // hashed with bcrypt
   name      String?
   createdAt DateTime @default(now())
@@ -21,9 +21,10 @@ model User {
 
   sessions    Session[]
   tasks       Task[]
+  groceries   Grocery[]
   preferences UserPreferences?
 
-  @@index([email])
+  @@index([username])
 }
 
 // Session model for JWT tokens
@@ -126,4 +127,47 @@ model UserPreferences {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Grocery models - separate from Task
+model GroceryCategory {
+  id        String   @id @default(uuid())
+  value     String
+  color     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  groceries GroceryCategoryAssignment[]
+
+  @@index([order])
+}
+
+model Grocery {
+  id        String   @id @default(uuid())
+  title     String
+  menge     String?
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+
+  user       User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories GroceryCategoryAssignment[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model GroceryCategoryAssignment {
+  id               String          @id @default(uuid())
+  groceryId        String
+  groceryCategoryId String
+  createdAt        DateTime        @default(now())
+
+  grocery         Grocery         @relation(fields: [groceryId], references: [id], onDelete: Cascade)
+  groceryCategory GroceryCategory @relation(fields: [groceryCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([groceryId, groceryCategoryId])
+  @@index([groceryId])
+  @@index([groceryCategoryId])
 }

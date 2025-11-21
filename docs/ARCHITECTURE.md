@@ -10,6 +10,16 @@ This document provides a detailed breakdown of the Organize-me system architectu
 - **Services:** API and WebSocket services for backend communication.
 - **Persistence:** UI state (tabs, filters, sorts) stored in localStorage.
 
+## Recent updates (v0.2.6)
+
+- Grocery features have been migrated to a first-class `Grocery` domain in the database and fully separated from the Task domain. New Prisma models (e.g. `Grocery`, `GroceryCategory`, `GroceryCategoryAssignment`) and backend routes/services were added.
+- The frontend now contains dedicated grocery hooks, components, and API clients (`useGroceries`, `useGroceryCategories`, `groceryApi`, `groceryCategoryApi`).
+- Authentication schema was simplified to use `username` (replaces prior `email` usage).
+- The frontend centralizes react-query keys and API paths to reduce brittle literal strings and improve cache invalidation.
+- Optimistic UI updates were added for category deletion and other quick interactions to reduce visible flicker.
+
+> Migration note: These schema changes are non-backwards-compatible with older databases. For development environments, a destructive reset and reseed is recommended (see README and `prisma/seed.ts`).
+
 ## Backend Architecture
 - **Entry Point:** `server.ts` initializes Express server and Socket.io.
 - **Controllers:** Handle business logic for authentication, tasks, options.

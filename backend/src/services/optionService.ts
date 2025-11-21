@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prismaClient';
 import { CreateOptionDto, UpdateOptionDto } from '../types';
-
-const prisma = new PrismaClient();
 
 /**
  * Get all status options

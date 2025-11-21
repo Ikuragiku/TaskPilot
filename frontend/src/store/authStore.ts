@@ -21,13 +21,13 @@ interface AuthState {
    */
   setUser: (user: User | null) => void;
   /**
-   * Logs in a user with email and password.
+    * Logs in a user with username and password.
    */
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   /**
-   * Registers a new user with email, password, and optional name.
+    * Registers a new user with username, password, and optional name.
    */
-  register: (email: string, password: string, name?: string) => Promise<void>;
+  register: (username: string, password: string, name?: string) => Promise<void>;
   /**
    * Logs out the current user.
    */
@@ -58,13 +58,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user, isAuthenticated: !!user }),
 
   /**
-   * Logs in a user with email and password.
+   * Logs in a user with username and password.
    * Updates store with user info and authentication status.
    */
-  login: async (email, password) => {
+  login: async (username, password) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await authService.login({ email, password });
+      const result = await authService.login({ username, password });
       set({
         user: result.user,
         isAuthenticated: true,
@@ -82,10 +82,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   /**
    * Registers a new user and updates store with user info and authentication status.
    */
-  register: async (email, password, name) => {
+  register: async (username, password, name) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await authService.register({ email, password, name });
+      const result = await authService.register({ username, password, name });
       set({
         user: result.user,
         isAuthenticated: true,

@@ -16,7 +16,7 @@ const createTaskSchema = z.object({
   statusIds: z.array(z.string()).optional(),
   projectIds: z.array(z.string()).optional(),
   done: z.boolean().optional(),
-  deadline: z.string().datetime().optional(),
+  deadline: z.string().optional().refine(val => !val || !Number.isNaN(Date.parse(val)), { message: 'Invalid date' }),
 });
 
 const updateTaskSchema = z.object({
@@ -25,7 +25,7 @@ const updateTaskSchema = z.object({
   statusIds: z.array(z.string()).optional(),
   projectIds: z.array(z.string()).optional(),
   done: z.boolean().optional(),
-  deadline: z.string().datetime().optional(),
+  deadline: z.union([z.string(), z.null()]).optional().refine(val => val === null || !val || !Number.isNaN(Date.parse(val as string)), { message: 'Invalid date' }),
 });
 
 /**

@@ -11,20 +11,20 @@ import { z } from 'zod';
 
 // Validation schemas for incoming requests
 const registerSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  username: z.string().min(3, 'Username must be at least 3 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   name: z.string().optional(),
 });
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
 /**
  * Register a new user
  * @route POST /api/auth/register
- * @body { email, password, name }
+ * @body { username, password, name }
  * @returns { success, data }
  */
 export const register = async (
@@ -48,7 +48,7 @@ export const register = async (
 /**
  * Login user
  * @route POST /api/auth/login
- * @body { email, password }
+ * @body { username, password }
  * @returns { success, data }
  */
 export const login = async (

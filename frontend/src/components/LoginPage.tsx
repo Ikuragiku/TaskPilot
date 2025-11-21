@@ -12,7 +12,7 @@ import { useAuthStore } from '../store/authStore';
  * Handles user input, login logic, and error feedback.
  */
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export const LoginPage: React.FC = () => {
     clearError();
 
     try {
-      await login(email, password);
+      await login(username, password);
       navigate('/');
     } catch (err) {
       console.error('Login error:', err);
@@ -71,20 +71,20 @@ export const LoginPage: React.FC = () => {
           )}
 
           <div style={{ marginBottom: '24px' }}>
-            <label htmlFor="email" style={{
+            <label htmlFor="username" style={{
               display: 'block',
               fontSize: '13px',
               fontWeight: '500',
               color: '#d1d5db',
               marginBottom: '8px'
-            }}>Email</label>
+            }}>Username</label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              autoComplete="email"
+              autoComplete="username"
               disabled={isLoading}
               style={{
                 width: '100%',

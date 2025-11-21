@@ -9,13 +9,14 @@ import { useEffect } from 'react';
 import * as taskService from '../services/taskService';
 import { Task, CreateTaskInput, UpdateTaskInput, TaskFilters, SocketEvent } from '../types';
 import { socketService } from '../services/socketService';
+import { queryKeys } from '../constants/queryKeys';
 
 /**
  * Hook to fetch all tasks with filters
  */
 export const useTasks = (filters?: TaskFilters) => {
   return useQuery({
-    queryKey: ['tasks', filters],
+    queryKey: [...queryKeys.tasks(), filters],
     queryFn: () => taskService.getTasks(filters),
   });
 };
@@ -25,7 +26,7 @@ export const useTasks = (filters?: TaskFilters) => {
  */
 export const useTask = (id: string) => {
   return useQuery({
-    queryKey: ['tasks', id],
+    queryKey: queryKeys.tasks(id),
     queryFn: () => taskService.getTask(id),
     enabled: !!id,
   });
@@ -41,7 +42,7 @@ export const useCreateTask = () => {
     mutationFn: (input: CreateTaskInput) => taskService.createTask(input),
     onSuccess: () => {
       // Invalidate tasks query to refetch
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks() });
     },
   });
 };
@@ -57,9 +58,9 @@ export const useUpdateTask = () => {
       taskService.updateTask(id, input),
     onSuccess: (updatedTask) => {
       // Update the task in cache
-      queryClient.setQueryData(['tasks', updatedTask.id], updatedTask);
+      queryClient.setQueryData(queryKeys.tasks(updatedTask.id) as any, updatedTask);
       // Invalidate tasks list
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks() });
     },
   });
 };
@@ -74,7 +75,7 @@ export const useDeleteTask = () => {
     mutationFn: (id: string) => taskService.deleteTask(id),
     onSuccess: () => {
       // Invalidate tasks query to refetch
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks() });
     },
   });
 };
@@ -88,18 +89,18 @@ export const useTaskRealtime = () => {
   useEffect(() => {
     const handleTaskCreated = (task: Task) => {
       console.log('Task created:', task);
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks() });
     };
 
     const handleTaskUpdated = (task: Task) => {
       console.log('Task updated:', task);
-      queryClient.setQueryData(['tasks', task.id], task);
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.setQueryData(queryKeys.tasks(task.id) as any, task);
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks() });
     };
 
     const handleTaskDeleted = (data: { id: string }) => {
       console.log('Task deleted:', data.id);
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks() });
     };
 
     // Subscribe to socket events
