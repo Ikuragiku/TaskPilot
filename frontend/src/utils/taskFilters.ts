@@ -27,7 +27,7 @@ export const filterTasks = (
   let list = tasks;
 
   // Filter by active tab
-  if (activeTab !== 'All Tasks') {
+  if (activeTab !== 'All') {
     list = list.filter(t => {
       const taskProjects = t.projects || [];
       return taskProjects.some(p => p.value.toLowerCase() === activeTab.toLowerCase());

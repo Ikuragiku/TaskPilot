@@ -1,55 +1,90 @@
 /**
- * GroceryOptionDropdown
- *
- * A lightweight dropdown for selecting and managing grocery categories (kategorie).
- * This is a grocery-only variant to avoid coupling with Task/project option UI.
+ * RecipeCategoryDropdown Component
+ * 
+ * Provides a portal-based dropdown for managing recipe categories.
+ * Supports multi-select, add/edit/delete, drag-to-reorder, and color customization.
+ * 
+ * Features:
+ * - Multi-select categories for a recipe
+ * - Add new categories with color selection
+ * - Edit existing category names and colors inline
+ * - Delete categories via right-click context menu
+ * - Drag to reorder categories
+ * - Optimistic UI updates with API sync
+ * 
+ * @component
+ * @example
+ * <RecipeCategoryDropdown
+ *   anchorEl={buttonElement}
+ *   recipeId="recipe-123"
+ *   options={categories}
+ *   currentCategoryIds={["cat-1", "cat-2"]}
+ *   onClose={() => setAnchor(null)}
+ *   updateRecipe={updateRecipe}
+ *   createCategory={createCategory}
+ *   updateCategory={updateCategory}
+ *   deleteCategory={deleteCategory}
+ * />
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Grocery, ProjectOption } from '../../types';
 import { PALETTE } from '../../utils/constants';
 import { ColorPalettePicker } from '../common/ColorPalettePicker';
 import { TabContextMenu } from '../common/TabContextMenu';
 
+/** Category type definition */
+type Category = { id: string; value: string; color: string; order: number };
+
+/**
+ * Props for RecipeCategoryDropdown component
+ */
 type Props = {
   anchorEl: HTMLElement | null;
-  task: Grocery;
-  options: ProjectOption[]; // grocery categories
+  recipeId: string | null;
+  options: Category[];
   onClose: () => void;
-  updateTask: (id: string, input: any) => Promise<void>;
-  createCategory: (data: { value: string; color: string }) => Promise<void>;
-  deleteCategory: (id: string) => Promise<void>;
-  updateCategory: (id: string, data: { value?: string; color?: string; order?: number }) => Promise<void>;
-  onOptionDeleted?: (opt: ProjectOption) => void;
+  updateRecipe: (id: string, input: any) => Promise<void> | void;
+  createCategory: (data: { value: string; color: string }) => Promise<void> | void;
+  deleteCategory: (id: string) => Promise<void> | void;
+  updateCategory: (id: string, data: { value?: string; color?: string; order?: number }) => Promise<void> | void;
+  onOptionDeleted?: (opt: Category) => void;
+  currentCategoryIds?: string[] | null;
 };
 
-export const GroceryOptionDropdown: React.FC<Props> = ({
+/**
+ * RecipeCategoryDropdown component - manages recipe category selection and CRUD
+ * @param {Props} props - Component props
+ * @returns {JSX.Element} Portal-rendered dropdown menu
+ */
+const RecipeCategoryDropdown: React.FC<Props> = ({
   anchorEl,
-  task,
+  recipeId,
   options,
   onClose,
-  updateTask,
+  updateRecipe,
   createCategory,
   deleteCategory,
   updateCategory,
-  onOptionDeleted
+  onOptionDeleted,
+  currentCategoryIds
 }) => {
-  const [selected, setSelected] = useState<Set<string>>(() => {
-    const set = new Set<string>();
-    (task.kategorieIds || []).forEach(id => {
-      const opt = options.find(o => o.id === id);
-      if (opt) set.add(opt.value);
-    });
-    return set;
-  });
-
   const [addName, setAddName] = useState('');
   const [addColor, setAddColor] = useState(PALETTE[0].color);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState(PALETTE[0].color);
-  const [optionContextMenu, setOptionContextMenu] = useState<{ x: number; y: number; opt: ProjectOption } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [optionContextMenu, setOptionContextMenu] = useState<{ x: number; y: number; opt: Category } | null>(null);
+
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    const s = new Set<string>();
+    if (currentCategoryIds && currentCategoryIds.length > 0) {
+      (currentCategoryIds || []).forEach((id: string) => {
+        const opt = options.find(o => o.id === id);
+        if (opt) s.add(opt.value);
+      });
+    }
+    return s;
+  });
 
   const sortedOptions = useMemo(() => [...options].sort((a, b) => a.order - b.order), [options]);
 
@@ -60,16 +95,10 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
   }, [anchorEl]);
 
   const applySelection = async (nextSelected: Set<string>) => {
+    if (!recipeId) return;
     const checkedValues = Array.from(nextSelected);
     const ids = options.filter(o => checkedValues.includes(o.value)).map(o => o.id);
-    // Backend expects `categoryIds` for groceries
-    try {
-      await updateTask(task.id, { categoryIds: ids });
-      setError(null);
-    } catch (err: any) {
-      console.error('Failed to update categories on grocery', err);
-      setError(err?.message || 'Failed to update categories');
-    }
+    await Promise.resolve(updateRecipe(recipeId, { categoryIds: ids }));
   };
 
   const toggleValue = async (value: string) => {
@@ -82,18 +111,12 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
   const handleAdd = async () => {
     const name = addName.trim();
     if (!name) return;
-    try {
-      await createCategory({ value: name, color: addColor });
-      setAddName('');
-      setAddColor(PALETTE[0].color);
-      setError(null);
-    } catch (err: any) {
-      console.error('Failed to create category', err);
-      setError(err?.message || 'Failed to create category');
-    }
+    await Promise.resolve(createCategory({ value: name, color: addColor }));
+    setAddName('');
+    setAddColor(PALETTE[0].color);
   };
 
-  const startEdit = (opt: ProjectOption) => {
+  const startEdit = (opt: Category) => {
     setEditingId(opt.id);
     setEditName(opt.value);
     setEditColor(opt.color);
@@ -103,19 +126,13 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
     if (!editingId) return;
     const name = editName.trim();
     if (!name) return;
-    try {
-      await updateCategory(editingId, { value: name, color: editColor });
-      setEditingId(null);
-      setError(null);
-    } catch (err: any) {
-      console.error('Failed to update category', err);
-      setError(err?.message || 'Failed to update category');
-    }
+    await Promise.resolve(updateCategory(editingId, { value: name, color: editColor }));
+    setEditingId(null);
   };
 
   const cancelEdit = () => setEditingId(null);
 
-  const handleDelete = (opt: ProjectOption, e: React.MouseEvent<HTMLLIElement>) => {
+  const handleDelete = (opt: Category, e: React.MouseEvent<HTMLLIElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setOptionContextMenu({ x: e.clientX + window.scrollX, y: e.clientY + window.scrollY, opt });
@@ -124,26 +141,19 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
   const confirmDelete = async () => {
     if (!optionContextMenu) return;
     const opt = optionContextMenu.opt;
-    try {
-      await deleteCategory(opt.id);
-      setError(null);
-    } catch (err: any) {
-      console.error('Failed to delete category', err);
-      setError(err?.message || 'Failed to delete category');
-    }
-    // Update task selection if needed
+    await Promise.resolve(deleteCategory(opt.id));
+    // remove it from local selection if present
     const s = new Set(selected);
     if (s.has(opt.value)) {
       s.delete(opt.value);
       setSelected(s);
-      // Apply selection will map values -> ids and send `categoryIds`
       await applySelection(s);
     }
     setOptionContextMenu(null);
     if (onOptionDeleted) onOptionDeleted(opt);
   };
 
-  // drag & drop reordering (same simple approach)
+  // drag reorder
   const dragIdxRef = useRef<number | null>(null);
   const onDragStart = (idx: number, e: React.DragEvent<HTMLLIElement>) => {
     dragIdxRef.current = idx;
@@ -172,7 +182,7 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
     const listCopy = [...sortedOptions];
     const [moved] = listCopy.splice(from, 1);
     listCopy.splice(idx, 0, moved);
-    await Promise.all(listCopy.map((opt, i) => updateCategory(opt.id, { order: i })));
+    await Promise.all(listCopy.map((opt, i) => Promise.resolve(updateCategory(opt.id, { order: i }))));
   };
 
   useEffect(() => {
@@ -185,26 +195,21 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
     <>
       <div className="dropdown-backdrop" onClick={onClose} />
       <div className="dd-menu" style={{ position: 'absolute', top: pos.top, left: pos.left }}>
-        {error && (
-          <div style={{ padding: '0.5rem 0.75rem', background: '#fff4f4', color: '#900', borderBottom: '1px solid #ffdede' }}>
-            <strong>Error:</strong>&nbsp;{error}
-          </div>
-        )}
         <div className="dd-sec">
           <p className="dd-title">Select Category</p>
           <ul className="dd-list">
             {sortedOptions.length === 0 && <li className="dd-item" style={{ cursor: 'default' }}>No categories</li>}
-            {sortedOptions.map((o, idx) => (
-              <li
-                key={o.id}
-                className={`dd-item${selected.has(o.value) ? ' selected' : ''}`}
+                    {sortedOptions.map((o, idx) => (
+                      <li
+                        key={o.id}
+                        className={`dd-item${selected.has(o.value) ? ' selected' : ''}`}
                 draggable={!editingId}
                 onDragStart={(e) => onDragStart(idx, e)}
                 onDragEnd={onDragEnd}
                 onDragOver={(e) => onDragOver(idx, e)}
                 onDragLeave={onDragLeave}
                 onDrop={(e) => onDrop(idx, e)}
-                onClick={() => !editingId && toggleValue(o.value)}
+                        onClick={() => !editingId && toggleValue(o.value)}
                 onContextMenu={(e) => handleDelete(o, e)}
               >
                 {editingId === o.id ? (
@@ -255,7 +260,7 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
         <TabContextMenu
           x={optionContextMenu.x}
           y={optionContextMenu.y}
-          tab={`Delete category`}
+          tab={`Delete Category`}
           onDelete={confirmDelete}
           onClose={() => setOptionContextMenu(null)}
         />
@@ -264,4 +269,4 @@ export const GroceryOptionDropdown: React.FC<Props> = ({
   );
 };
 
-export default GroceryOptionDropdown;
+export default RecipeCategoryDropdown;

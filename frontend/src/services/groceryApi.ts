@@ -1,12 +1,12 @@
-import api from './api';
-import { Grocery, CreateGroceryInput, UpdateGroceryInput } from '../types';
-import { API_PATHS } from '../constants/apiPaths';
-
 /**
  * ServerGrocery
  * Partial shape of the grocery object returned by the server API.
  * Dates are returned as ISO strings and categories are returned as minimal objects.
  */
+import api from './api';
+import { Grocery, CreateGroceryInput, UpdateGroceryInput } from '../types';
+import { API_PATHS } from '../constants/apiPaths';
+
 type ServerGrocery = {
   id: string;
   title: string;

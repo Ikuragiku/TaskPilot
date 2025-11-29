@@ -22,6 +22,7 @@ model User {
   sessions    Session[]
   tasks       Task[]
   groceries   Grocery[]
+  recipes     Recipe[]
   preferences UserPreferences?
 
   @@index([username])
@@ -170,4 +171,60 @@ model GroceryCategoryAssignment {
   @@unique([groceryId, groceryCategoryId])
   @@index([groceryId])
   @@index([groceryCategoryId])
+}
+
+// Recipes models (separate from Tasks and Groceries)
+model RecipeCategory {
+  id        String   @id @default(uuid())
+  value     String
+  color     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  assignments RecipeCategoryAssignment[]
+
+  @@index([order])
+}
+
+model Recipe {
+  id        String   @id @default(uuid())
+  title     String
+  description String?
+  portions  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+
+  user      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     RecipeItem[]
+  categories RecipeCategoryAssignment[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model RecipeItem {
+  id        String   @id @default(uuid())
+  recipeId  String
+  name      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model RecipeCategoryAssignment {
+  id                 String         @id @default(uuid())
+  recipeId           String
+  recipeCategoryId   String
+  createdAt          DateTime       @default(now())
+
+  recipe       Recipe         @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeCategory RecipeCategory @relation(fields: [recipeCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, recipeCategoryId])
+  @@index([recipeId])
+  @@index([recipeCategoryId])
 }

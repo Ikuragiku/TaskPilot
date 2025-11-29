@@ -1,9 +1,27 @@
+/**
+ * Task Service
+ *
+ * Business logic for task management.
+ * Handles CRUD operations with user scoping, filtering, and many-to-many relations
+ * (task-status and task-project assignments).
+ *
+ * Key features:
+ * - User-scoped task retrieval and modification
+ * - Search filtering across title and description
+ * - Status and project filtering
+ * - Transactional updates for relation changes
+ * - Validation of foreign key references to prevent orphaned relations
+ */
 import { Prisma } from '@prisma/client';
 import prisma from '../prismaClient';
 import { CreateTaskDto, UpdateTaskDto } from '../types';
 
 /**
- * Get all tasks for a user with filters
+ * Retrieves all tasks for a user with optional filtering.
+ * Supports search by title/description and filtering by status/project IDs.
+ * @param userId - User ID
+ * @param filters - Optional filters (search, statusIds, projectIds)
+ * @returns Array of tasks with nested statuses and projects
  */
 export const getTasks = async (
   userId: string,
@@ -69,7 +87,11 @@ export const getTasks = async (
 };
 
 /**
- * Get a single task by ID
+ * Retrieves a single task by ID for a user.
+ * @param taskId - Task ID
+ * @param userId - User ID (for ownership verification)
+ * @returns Task with nested statuses and projects
+ * @throws Error if task not found or doesn't belong to user
  */
 export const getTaskById = async (taskId: string, userId: string) => {
   const task = await prisma.task.findFirst({
@@ -109,7 +131,11 @@ export const getTaskById = async (taskId: string, userId: string) => {
 };
 
 /**
- * Create a new task
+ * Creates a new task with optional status and project assignments.
+ * Validates provided status/project IDs to prevent foreign key errors.
+ * @param userId - Owner of the task
+ * @param data - Task creation data
+ * @returns Newly created task with statuses and projects
  */
 export const createTask = async (userId: string, data: CreateTaskDto) => {
   // Validate provided status and project IDs to avoid FK errors
@@ -176,7 +202,14 @@ export const createTask = async (userId: string, data: CreateTaskDto) => {
 };
 
 /**
- * Update a task
+ * Updates an existing task.
+ * Can update basic fields and replace status/project assignments.
+ * Uses a transaction to ensure consistency. Validates IDs to prevent orphaned relations.
+ * @param taskId - Task ID
+ * @param userId - User ID (for ownership verification)
+ * @param data - Partial update data
+ * @returns Updated task with statuses and projects
+ * @throws Error if task not found or doesn't belong to user
  */
 export const updateTask = async (
   taskId: string,
@@ -286,7 +319,11 @@ export const updateTask = async (
 };
 
 /**
- * Delete a task
+ * Deletes a task and all its status/project assignments (cascade).
+ * @param taskId - Task ID
+ * @param userId - User ID (for ownership verification)
+ * @returns Object with deleted task ID
+ * @throws Error if task not found or doesn't belong to user
  */
 export const deleteTask = async (taskId: string, userId: string) => {
   // Verify task belongs to user

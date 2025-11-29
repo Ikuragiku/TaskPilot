@@ -164,12 +164,20 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
         <div className="chips-compact sort-chips">
           {sortChips}
           {hasSorts && (
-            <button
-              className="clear-all-btn"
-              onClick={onClearSorts}
-            >
-              Clear sorts
-            </button>
+            <>
+              <button
+                className="add-chip-btn"
+                onClick={(e) => onAddSortClick(e.currentTarget)}
+              >
+                + Add sort
+              </button>
+              <button
+                className="clear-all-btn"
+                onClick={onClearSorts}
+              >
+                Clear sorts
+              </button>
+            </>
           )}
           {!hasSorts && (
             <button

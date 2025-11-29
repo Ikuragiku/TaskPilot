@@ -23,11 +23,11 @@ export const GroceryTableHeader: React.FC<Props> = ({ columns, sorts, setColumns
     done: 'Done',
     name: 'Name',
     description: 'Description',
-    menge: 'Menge',
+    menge: 'Amount',
     status: 'Status',
     deadline: 'Deadline',
     project: 'Project',
-    kategorie: 'Kategorie'
+    kategorie: 'Category'
   };
 
   return (

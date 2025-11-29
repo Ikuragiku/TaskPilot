@@ -4,6 +4,7 @@
  * Main entry point for the frontend React application.
  * Sets up routing, error boundaries, and React Query provider.
  */
+import React from 'react';
 import { BrowserRouter, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -11,6 +12,7 @@ import { LoginPage } from './components/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { TaskDashboard } from './components/task-dashboard/TaskDashboard';
 import { GroceryDashboard } from './components/grocery-dashboard/GroceryDashboard';
+import RecipesDashboard from './components/recipes/RecipesDashboard';
 import Hub from './components/hub/Hub';
 import FadeRoute from './components/FadeRoute';
 // Global styles are imported per-page to avoid conflicts
@@ -29,6 +31,18 @@ const queryClient = new QueryClient({
  */
 function AppRoutes() {
   const location = useLocation();
+  // Update the document title based on the current route
+  React.useEffect(() => {
+    const base = 'TaskPilot';
+    const path = location.pathname;
+    let suffix = '';
+    if (path === '/') suffix = 'Home';
+    else if (path.startsWith('/tasks')) suffix = 'Tasks';
+    else if (path.startsWith('/groceries')) suffix = 'Groceries';
+    else if (path.startsWith('/recipes')) suffix = 'Recipes';
+    else if (path.startsWith('/login')) suffix = 'Login';
+    document.title = suffix ? `${base} | ${suffix}` : base;
+  }, [location.pathname]);
   return (
     <FadeRoute key={location.pathname}>
       <Routes location={location}>
@@ -51,10 +65,18 @@ function AppRoutes() {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
         <Route
-          path="/grocery"
+          path="/groceries"
           element={
             <ProtectedRoute>
               <GroceryDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes"
+          element={
+            <ProtectedRoute>
+              <RecipesDashboard />
             </ProtectedRoute>
           }
         />

@@ -119,7 +119,7 @@ export const OptionDropdown: React.FC<Props> = ({
     await deleteOption(opt.id);
     await applySelection(selected);
     setOptionContextMenu(null);
-    if (type === 'project' && onOptionDeleted) {
+    if (onOptionDeleted) {
       onOptionDeleted(opt);
     }
   };

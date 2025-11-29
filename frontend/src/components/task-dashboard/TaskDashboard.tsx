@@ -101,19 +101,19 @@ export const TaskDashboard: React.FC = () => {
 
   const [tabs, setTabs] = useState<string[]>(() => {
     try {
-      const savedTabs = JSON.parse(localStorage.getItem(TABS_KEY) || '["All Tasks"]');
-      const t = savedTabs.length ? savedTabs : ['All Tasks'];
-      if (!t.includes('All Tasks')) {
-        t.unshift('All Tasks');
+      const savedTabs = JSON.parse(localStorage.getItem(TABS_KEY) || '["All"]');
+      const t = savedTabs.length ? savedTabs : ['All'];
+      if (!t.includes('All')) {
+        t.unshift('All');
       }
       return t;
     } catch {
-      return ['All Tasks'];
+      return ['All'];
     }
   });
 
   const [activeTab, setActiveTab] = useState<string>(() => {
-    const saved = localStorage.getItem(ACTIVE_TAB_KEY) || 'All Tasks';
+    const saved = localStorage.getItem(ACTIVE_TAB_KEY) || 'All';
     return saved;
   });
 
@@ -266,17 +266,24 @@ export const TaskDashboard: React.FC = () => {
               onTabClick={setActiveTab}
               onTabContextMenu={openTabMenu}
               onAddTabClick={openAddTabMenu}
+              onReorder={(newTabs) => setTabs(newTabs)}
             />
             <TaskToolbar
               onAddTask={async () => {
                 try {
+                  // Inherit active filters/tab for new task so it appears in the current view
+                  const selectedProjectIds = (() => {
+                    const fromTab = activeTab !== 'All' ? projectOptions.filter(p => p.value === activeTab).map(p => p.id) : [];
+                    const fromFilters = (filters.project || []).map(val => projectOptions.find(p => p.value === val)?.id).filter(Boolean) as string[];
+                    return Array.from(new Set([ ...fromTab, ...fromFilters ]));
+                  })();
+                  const selectedStatusIds = ((filters.status || []).map(val => statusOptions.find(s => s.value === val)?.id).filter(Boolean)) as string[];
+                  const doneValue = filters.done !== null ? Boolean(filters.done) : undefined;
                   await createTask.mutateAsync({
                     title: 'New Task',
-                    projectIds: activeTab !== 'All Tasks'
-                      ? projectOptions
-                          .filter(p => p.value === activeTab)
-                          .map(p => p.id)
-                      : undefined
+                    projectIds: selectedProjectIds.length ? selectedProjectIds : undefined,
+                    statusIds: selectedStatusIds.length ? selectedStatusIds : undefined,
+                    done: doneValue,
                   });
                 } catch (error) {
                   console.error('Failed to create task:', error);
@@ -364,7 +371,7 @@ export const TaskDashboard: React.FC = () => {
                           // Find the correct cell and focus it
                           const tbody = tbodyRef.current;
                           if (!tbody) return;
-                          const rows = Array.from(tbody.querySelectorAll('tr:not(.add-task-row)'));
+                          const rows = Array.from(tbody.querySelectorAll('tr'));
                           if (r >= rows.length) r = 0;
                           const row = rows[r];
                           if (!row) return;
@@ -382,25 +389,6 @@ export const TaskDashboard: React.FC = () => {
                     ))}
                   </tr>
                 ))}
-                <tr className="add-task-row">
-                  <td colSpan={columns.length}>
-                    <button
-                      className="btn small"
-                      onClick={async () => {
-                        await createTask.mutateAsync({
-                          title: 'New Task',
-                          projectIds: activeTab !== 'All Tasks'
-                            ? projectOptions
-                                .filter(p => p.value === activeTab)
-                                .map(p => p.id)
-                            : undefined
-                        });
-                      }}
-                    >
-                      + Add task
-                    </button>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -423,7 +411,7 @@ export const TaskDashboard: React.FC = () => {
             tab={tabMenu.tab}
             onDelete={() => {
               setTabs(t => t.filter(x => x !== tabMenu.tab));
-              if (activeTab === tabMenu.tab) setActiveTab('All Tasks');
+                      if (activeTab === tabMenu.tab) setActiveTab('All');
               setTabMenu(null);
             }}
             onClose={() => setTabMenu(null)}
@@ -468,8 +456,15 @@ export const TaskDashboard: React.FC = () => {
             }
             onOptionDeleted={(opt) => {
               // remove any tab that matches the deleted project's value
-              setTabs(t => t.filter(x => x !== opt.value));
-              if (activeTab === opt.value) setActiveTab('All Tasks');
+              if (optionMenu?.type === 'project') {
+                setTabs(t => t.filter(x => x !== opt.value));
+                if (activeTab === opt.value) setActiveTab('All');
+                // also clear any project filter using this value
+                setFilters(f => ({ ...f, project: (f.project || []).filter(v => v !== opt.value) }));
+              } else if (optionMenu?.type === 'status') {
+                // clear any status filter using this value
+                setFilters(f => ({ ...f, status: (f.status || []).filter(v => v !== opt.value) }));
+              }
             }}
           />
         )}
@@ -483,7 +478,7 @@ export const TaskDashboard: React.FC = () => {
           onDelete={() => {
             setTabs(tabs.filter(t => t.toLowerCase() !== tabMenu.tab.toLowerCase()));
             if (activeTab === tabMenu.tab) {
-              setActiveTab('All Tasks');
+              setActiveTab('All');
             }
             setTabMenu(null);
           }}

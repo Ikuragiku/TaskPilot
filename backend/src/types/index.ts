@@ -1,3 +1,13 @@
+/**
+ * Type Definitions
+ *
+ * Shared TypeScript types and interfaces for the backend API.
+ * Includes:
+ * - Request/Response types
+ * - DTOs for tasks, groceries, recipes, options, and auth
+ * - WebSocket event enums
+ * - User preferences
+ */
 import { Request } from 'express';
 
 // Extend Express Request to include authenticated user
@@ -61,6 +71,29 @@ export interface UpdateOptionDto {
   value?: string;
   color?: string;
   order?: number;
+}
+
+// Recipe DTOs
+export interface RecipeItemDto {
+  id?: string;
+  name: string;
+  order?: number;
+}
+
+export interface CreateRecipeDto {
+  title: string;
+  description?: string;
+  portions?: number | null;
+  itemNames?: string[]; // simple list of item names for creation
+  categoryIds?: string[];
+}
+
+export interface UpdateRecipeDto {
+  title?: string;
+  description?: string | null;
+  portions?: number | null;
+  itemNames?: string[] | null; // null to clear
+  categoryIds?: string[] | null; // null to clear
 }
 
 // Auth types

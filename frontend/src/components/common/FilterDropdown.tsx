@@ -19,6 +19,7 @@ type Props = {
   projectLabel?: string;
   showStatus?: boolean;
   showProject?: boolean;
+  showDone?: boolean;
 };
 
 /**
@@ -35,6 +36,7 @@ export const FilterDropdown: React.FC<Props> = ({
   projectLabel = 'Filter by Project',
   showStatus = true,
   showProject = true,
+  showDone = true,
 }) => {
   const pos = useMemo(() => {
     if (!anchorEl) return { top: 0, left: 0 };
@@ -110,23 +112,25 @@ export const FilterDropdown: React.FC<Props> = ({
             </div>
           </div>
         )}
-        <div className="dd-sec">
-          <p className="dd-title">Filter by Done</p>
-          <div className="filter-list">
-            <label className="filter-option">
-              <input type="radio" name="done-filter" checked={filters.done === null} onChange={() => setDone('all')} />
-              <span>All</span>
-            </label>
-            <label className="filter-option">
-              <input type="radio" name="done-filter" checked={filters.done === true} onChange={() => setDone('done')} />
-              <span>Done</span>
-            </label>
-            <label className="filter-option">
-              <input type="radio" name="done-filter" checked={filters.done === false} onChange={() => setDone('notdone')} />
-              <span>Not Done</span>
-            </label>
+        {showDone && (
+          <div className="dd-sec">
+            <p className="dd-title">Filter by Done</p>
+            <div className="filter-list">
+              <label className="filter-option">
+                <input type="radio" name="done-filter" checked={filters.done === null} onChange={() => setDone('all')} />
+                <span>All</span>
+              </label>
+              <label className="filter-option">
+                <input type="radio" name="done-filter" checked={filters.done === true} onChange={() => setDone('done')} />
+                <span>Done</span>
+              </label>
+              <label className="filter-option">
+                <input type="radio" name="done-filter" checked={filters.done === false} onChange={() => setDone('notdone')} />
+                <span>Not Done</span>
+              </label>
+            </div>
           </div>
-        </div>
+        )}
         <div className="dd-sec">
           <div className="dd-actions">
             <button className="btn small clear-filter" onClick={resetFilters}>Reset</button>

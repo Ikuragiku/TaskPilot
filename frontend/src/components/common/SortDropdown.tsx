@@ -46,7 +46,14 @@ export const SortDropdown: React.FC<Props> = ({ anchorEl, sorts, setSorts, onClo
   };
 
   const changeDir = (field: string, dir: 'asc' | 'desc') => {
-    setSorts(prev => prev.map(s => (s.field === field ? { ...s, asc: dir === 'asc' } : s)));
+    setSorts(prev => {
+      const exists = prev.find(s => s.field === field);
+      if (exists) {
+        return prev.map(s => (s.field === field ? { ...s, asc: dir === 'asc' } : s));
+      }
+      // If user changes direction before checking, auto-add this sort
+      return [...prev, { field, asc: dir === 'asc' }];
+    });
   };
 
   const reset = () => setSorts([]);
@@ -72,15 +79,24 @@ export const SortDropdown: React.FC<Props> = ({ anchorEl, sorts, setSorts, onClo
                     onChange={e => toggleField(field, e.currentTarget.checked, dir)}
                   />
                   <span>{field.charAt(0).toUpperCase() + field.slice(1)}</span>
-                  <select
-                    className="sort-direction"
-                    value={dir}
-                    disabled={!checked}
-                    onChange={e => changeDir(field, e.currentTarget.value as 'asc' | 'desc')}
-                  >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                  </select>
+                  <div className="sort-dir-toggle" role="group" aria-label={`Sort direction for ${field}`}>
+                    <button
+                      type="button"
+                      className={`seg-btn${dir === 'asc' ? ' active' : ''}`}
+                      onClick={() => changeDir(field, 'asc')}
+                      title="Ascending"
+                    >
+                      ASC
+                    </button>
+                    <button
+                      type="button"
+                      className={`seg-btn${dir === 'desc' ? ' active' : ''}`}
+                      onClick={() => changeDir(field, 'desc')}
+                      title="Descending"
+                    >
+                      DSC
+                    </button>
+                  </div>
                 </label>
               );
             })}

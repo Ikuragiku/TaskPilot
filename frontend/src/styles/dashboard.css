@@ -700,17 +700,19 @@ textarea {
   word-break: break-word;
 }
 
-/* Focus styles for non-contenteditable cells (status, deadline, project)
+/* Focus styles for non-contenteditable cells (status, deadline, project, category)
    So keyboard navigation (Tab) shows the same gray highlight as name/description */
 .tasks-table td[data-field="status"],
 .tasks-table td[data-field="deadline"],
-.tasks-table td[data-field="project"] {
+.tasks-table td[data-field="project"],
+.tasks-table td[data-field="category"] {
   outline: none;
 }
 
 .tasks-table td[data-field="status"]:focus,
 .tasks-table td[data-field="deadline"]:focus,
-.tasks-table td[data-field="project"]:focus {
+.tasks-table td[data-field="project"]:focus,
+.tasks-table td[data-field="category"]:focus {
   position: relative;
   z-index: 5;
   background: var(--surface-2);
@@ -859,9 +861,10 @@ textarea {
   color: #4dd06d; 
 }
 
-/* Status/project cells are clickable to open dropdown */
+/* Status/project/category cells are clickable to open dropdown */
 .tasks-table td[data-field="status"],
-.tasks-table td[data-field="project"] { 
+.tasks-table td[data-field="project"],
+.tasks-table td[data-field="category"] { 
   cursor: pointer; 
 }
 
@@ -878,7 +881,8 @@ textarea {
 }
 
 .tasks-table td[data-field="status"] .badge,
-.tasks-table td[data-field="project"] .badge {
+.tasks-table td[data-field="project"] .badge,
+.tasks-table td[data-field="category"] .badge {
   margin-right: 0.375rem;
   margin-bottom: 0.25rem;
   display: inline-block;
@@ -904,6 +908,29 @@ textarea {
   position: fixed;
   inset: 0;
   z-index: 999;
+}
+
+/* Modal backdrop — darker gray overlay for modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(10,12,15,0.6); /* darker gray */
+}
+
+/* Modal window styling */
+.modal-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1201;
+  min-width: 520px;
+  max-width: 90vw;
+  background: linear-gradient(180deg, #0f1a22 0%, #0b141a 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 @keyframes slideUp {
@@ -968,6 +995,37 @@ textarea {
   background: var(--surface-2); 
 }
 
+/* Ingredients preview: show 'View all' on hover */
+.ingredients-preview { position: relative; }
+.ingredients-preview .view-all-option {
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+  padding: 0.2rem 0.25rem;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+}
+.ingredients-preview .view-all-option .icon svg { display: block; }
+.ingredients-preview .view-all-option .label { color: inherit; }
+.ingredients-preview .view-all-option:hover { color: var(--text); background: var(--surface-2); }
+
+/* Recipe preview: clamp to 5 lines and show View all when content overflows */
+.recipe-text-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  max-height: calc(1.4em * 5);
+  white-space: normal;
+}
+.recipe-text-clamp p { margin: 0 0 0.5rem 0; }
+
 .dd-item:active { 
   background: var(--surface-3); 
 }
@@ -987,6 +1045,31 @@ textarea {
   background: rgba(47,129,247,0.3);
   box-shadow: 0 0 0 2px var(--primary) inset;
   transform: scale(1.02);
+}
+
+/* Drag states for tabs reordering */
+.tab.dragging {
+  opacity: 0.45;
+  cursor: grabbing;
+}
+
+.tab.drop-target {
+  background: rgba(47,129,247,0.28);
+  box-shadow: 0 0 0 2px var(--primary) inset;
+  transform: scale(1.02);
+}
+
+/* Hub tile drag visuals */
+.hub-tile.dragging {
+  opacity: 0.45;
+  transform: translateY(-4px);
+  cursor: grabbing;
+}
+
+.hub-tile.drop-target {
+  background: rgba(47,129,247,0.16);
+  box-shadow: 0 0 0 2px var(--primary) inset;
+  transform: scale(1.01);
 }
 
 /* Selected state for options */
@@ -1050,6 +1133,24 @@ textarea {
 .icon-btn:hover { 
   background: var(--surface-2); 
   color: var(--text); 
+}
+
+/* More visible close button for modals */
+.icon-btn.close {
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 0.35rem;
+  border-radius: 8px;
+}
+.icon-btn.close svg { width: 16px; height: 16px; }
+.icon-btn.close:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+.icon-btn.close:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.06);
 }
 
 .icon-btn:active { 
@@ -1173,10 +1274,51 @@ textarea {
   margin-left: auto;
   font-size: 0.8125rem;
   transition: all var(--transition-fast);
+  appearance: none; /* unify native styling */
 }
 
 .sort-direction:hover { 
   background: var(--surface-2); 
+}
+
+/* Ensure dropdown menu (options list) uses dark theme */
+.sort-direction option {
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.sort-direction:focus {
+  background: var(--surface-2);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(47,129,247,0.1);
+}
+
+/* Segmented control for sort direction (ASC/DSC) */
+.sort-dir-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.seg-btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.seg-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.seg-btn.active {
+  background: var(--surface-2);
+  border-color: var(--primary);
+  color: var(--text);
 }
 
 /* Inline edit row inside dropdown list */

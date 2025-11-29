@@ -30,7 +30,9 @@ export const TabContextMenu: React.FC<Props> = ({ x, y, tab: _tab, onDelete, onC
       <div className="dd-menu tab-menu" style={{ position: 'absolute', top: y, left: x }}>
         <div className="dd-sec">
           <ul className="dd-list">
-            <li className="dd-item del-tab" onClick={onDelete}><span>Delete Tab</span></li>
+            <li className="dd-item del-tab" onClick={onDelete}>
+              <span>{_tab.startsWith('Delete') ? _tab : 'Delete Tab'}</span>
+            </li>
           </ul>
         </div>
       </div>

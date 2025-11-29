@@ -105,19 +105,19 @@ export const GroceryDashboard: React.FC = () => {
 
   const [tabs, setTabs] = useState<string[]>(() => {
     try {
-      const savedTabs = JSON.parse(localStorage.getItem(GROCERY_TABS_KEY) || '["All Tasks"]');
-      const t = savedTabs.length ? savedTabs : ['All Tasks'];
-      if (!t.includes('All Tasks')) {
-        t.unshift('All Tasks');
+      const savedTabs = JSON.parse(localStorage.getItem(GROCERY_TABS_KEY) || '["All"]');
+      const t = savedTabs.length ? savedTabs : ['All'];
+      if (!t.includes('All')) {
+        t.unshift('All');
       }
       return t;
     } catch {
-      return ['All Tasks'];
+      return ['All'];
     }
   });
 
   const [activeTab, setActiveTab] = useState<string>(() => {
-    const saved = localStorage.getItem(GROCERY_ACTIVE_TAB_KEY) || 'All Tasks';
+    const saved = localStorage.getItem(GROCERY_ACTIVE_TAB_KEY) || 'All';
     return saved;
   });
 
@@ -186,7 +186,7 @@ export const GroceryDashboard: React.FC = () => {
   // Filter and sort groceries (simple implementation separate from tasks)
   const filteredTasks = (tasks || []).filter((g) => {
     // active tab (tabs are category values)
-    if (activeTab && activeTab !== 'All Tasks') {
+            if (activeTab && activeTab !== 'All') {
       const cat = groceryCategories.find(c => c.value === activeTab);
       if (!cat) return false;
       if (!g.kategorieIds || !g.kategorieIds.includes(cat.id)) return false;
@@ -358,17 +358,21 @@ export const GroceryDashboard: React.FC = () => {
               onTabClick={setActiveTab}
               onTabContextMenu={openTabMenu}
               onAddTabClick={openAddTabMenu}
+              onReorder={(newTabs) => setTabs(newTabs)}
             />
             <GroceryToolbar
               onAddGrocery={async () => {
                 try {
+                  const selectedCategoryIds = (() => {
+                    const fromTab = activeTab !== 'All' ? groceryCategories.filter(c => c.value === activeTab).map(c => c.id) : [];
+                    const fromFilters = (filters.project || []).map(val => groceryCategories.find(c => c.value === val)?.id).filter(Boolean) as string[];
+                    return Array.from(new Set([ ...fromTab, ...fromFilters ]));
+                  })();
+                  const doneValue = filters.done !== null ? Boolean(filters.done) : undefined;
                   await createGrocery.mutateAsync({
                     title: 'New Grocery',
-                    projectIds: activeTab !== 'All Tasks'
-                      ? groceryCategories
-                          .filter(p => p.value === activeTab)
-                          .map(p => p.id)
-                      : undefined
+                    projectIds: selectedCategoryIds.length ? selectedCategoryIds : undefined,
+                    done: doneValue,
                   });
                 } catch (error) {
                   console.error('Failed to create grocery:', error);
@@ -457,7 +461,7 @@ export const GroceryDashboard: React.FC = () => {
                           // Find the correct cell and focus it
                           const tbody = tbodyRef.current;
                           if (!tbody) return;
-                          const rows = Array.from(tbody.querySelectorAll('tr:not(.add-task-row)'));
+                          const rows = Array.from(tbody.querySelectorAll('tr'));
                           if (r >= rows.length) r = 0;
                           const row = rows[r];
                           if (!row) return;
@@ -477,25 +481,6 @@ export const GroceryDashboard: React.FC = () => {
                     ))}
                   </tr>
                 ))}
-                <tr className="add-task-row">
-                  <td colSpan={columns.length}>
-                    <button
-                      className="btn small"
-                      onClick={async () => {
-                        await createGrocery.mutateAsync({
-                          title: 'New Grocery',
-                          projectIds: activeTab !== 'All Tasks'
-                            ? groceryCategories
-                                .filter(p => p.value === activeTab)
-                                .map(p => p.id)
-                            : undefined
-                        });
-                      }}
-                    >
-                      + Add grocery
-                    </button>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -559,6 +544,8 @@ export const GroceryDashboard: React.FC = () => {
               onOptionDeleted={(opt) => {
                 setTabs(t => t.filter(x => x !== opt.value));
                 if (activeTab === opt.value) setActiveTab('All Tasks');
+                // also clear any category filter using this value
+                setFilters(f => ({ ...f, project: (f.project || []).filter(v => v !== opt.value) }));
               }}
             />
           ) : (

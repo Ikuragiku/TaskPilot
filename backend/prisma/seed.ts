@@ -3,24 +3,53 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+const p: any = prisma;
 
 async function main() {
   console.log('Seeding database...');
+  // Wipe existing data (safe for local/dev only)
+  console.log('Clearing existing records...');
+  // Delete order matters due to foreign keys; use deleteMany which follows cascade rules set in schema
+  await prisma.taskStatus.deleteMany();
+  await prisma.taskProject.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.statusOption.deleteMany();
+  await prisma.projectOption.deleteMany();
+
+  await prisma.groceryCategoryAssignment.deleteMany();
+  await prisma.grocery.deleteMany();
+  await prisma.groceryCategory.deleteMany();
+
+  // Recipes (if present) - new models
+  try {
+    await p.recipeCategoryAssignment.deleteMany();
+    await p.recipeItem.deleteMany();
+    await p.recipe.deleteMany();
+    await p.recipeCategory.deleteMany();
+  } catch (err) {
+    // Models may not exist before migration; ignore errors
+  }
+
+  // Sessions and preferences and users
+  await prisma.session.deleteMany();
+  await prisma.userPreferences?.deleteMany?.().catch(() => {});
+  // Remove all users (we will recreate a seed user)
+  await prisma.user.deleteMany();
+
+  console.log('✅ Database cleared');
 
   // Create a default user for testing/login
   const seedUsername = 'baxxter';
   const seedPassword = '123456';
   const hashed = await bcrypt.hash(seedPassword, 10);
-  const user = await prisma.user.upsert({
-    where: { username: seedUsername } as any,
-    update: {},
-    create: {
+  const user = await prisma.user.create({
+    data: {
       username: seedUsername,
       password: hashed,
       name: 'LW',
     } as any,
   });
-  console.log(`✅ Ensured test user exists: ${seedUsername}`);
+  console.log(`✅ Created test user: ${seedUsername}`);
 
   // Create default status options
   const statusOptions = [
@@ -159,6 +188,60 @@ async function main() {
   }
 
   console.log('Created sample groceries');
+
+  // --- Recipes sample data (stored in separate recipe tables) ---
+  // Create some recipe categories
+  const recipeCats = [
+    { value: 'Dinner', color: '#2f81f7', order: 1 },
+    { value: 'Dessert', color: '#ff4da6', order: 2 },
+    { value: 'Breakfast', color: '#e3b341', order: 3 },
+  ];
+  for (const rc of recipeCats) {
+    const exists = await p.recipeCategory.findFirst({ where: { value: rc.value } as any });
+    if (!exists) {
+      await p.recipeCategory.create({ data: rc as any });
+    }
+  }
+  const dbRecipeCats = await p.recipeCategory.findMany();
+  const recipeCatByValue = new Map(dbRecipeCats.map((c: any) => [c.value, c.id]));
+
+  // Create sample recipes
+  const sampleRecipes = [
+    {
+      title: 'Spaghetti Aglio e Olio',
+      description: 'Classic Italian pasta with garlic, olive oil, chili flakes and parsley.',
+      portions: 2,
+      categories: ['Dinner'],
+      items: ['Spaghetti 200g', 'Garlic 3 cloves', 'Olive oil 3 tbsp', 'Chili flakes 1 tsp', 'Parsley handful']
+    },
+    {
+      title: 'Pancakes',
+      description: 'Fluffy pancakes served with syrup.',
+      portions: 4,
+      categories: ['Breakfast', 'Dessert'],
+      items: ['Flour 200g', 'Milk 300ml', 'Eggs 2', 'Sugar 2 tbsp', 'Baking powder 1 tsp']
+    }
+  ];
+
+  for (const r of sampleRecipes) {
+    const exists = await p.recipe.findFirst({ where: { title: r.title, userId: user.id } as any });
+    if (exists) continue;
+    const created = await p.recipe.create({ data: { title: r.title, description: r.description, portions: r.portions, userId: user.id } as any });
+    // items
+    for (let i = 0; i < (r.items || []).length; i++) {
+      const name = r.items[i];
+      await p.recipeItem.create({ data: { recipeId: created.id, name, order: i } as any });
+    }
+    // categories
+    for (const cv of (r.categories || [])) {
+      const cid = recipeCatByValue.get(cv);
+      if (cid) {
+        await p.recipeCategoryAssignment.create({ data: { recipeId: created.id, recipeCategoryId: cid } as any });
+      }
+    }
+  }
+
+  console.log('Created sample recipes');
 
   console.log('Seeding complete!');
 }

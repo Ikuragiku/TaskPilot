@@ -68,10 +68,10 @@ export const AddTabDropdown: React.FC<Props> = ({
       <div className="dropdown-backdrop" onClick={onClose} />
       <div className="dd-menu" style={{ position: 'absolute', top: pos.top, left: pos.left }}>
         <div className="dd-sec">
-          <p className="dd-title">Add project tab</p>
+          <p className="dd-title">ADD TAB</p>
           <ul className="dd-list">
             {available.length === 0 && (
-              <li className="dd-item" style={{ cursor: 'default' }}>No projects available</li>
+              <li className="dd-item" style={{ cursor: 'default' }}>No tabs available</li>
             )}
             {available.map(p => (
               <li key={p.id} className="dd-item" onClick={() => addExisting(p.value)}>
@@ -82,9 +82,9 @@ export const AddTabDropdown: React.FC<Props> = ({
           </ul>
         </div>
         <div className="dd-sec dd-add">
-          <p className="dd-title">Add new project</p>
+          <p className="dd-title">ADD NEW TAB</p>
           <div className="dd-input-row">
-            <input type="text" className="dd-input name" placeholder="Project name" value={name} onChange={e => setName(e.target.value)} />
+            <input type="text" className="dd-input name" placeholder="Tab name" value={name} onChange={e => setName(e.target.value)} />
           </div>
           <ColorPalettePicker selectedColor={color} onColorSelect={setColor} />
           <button className="btn small add-btn" onClick={handleAddNew}>Add</button>

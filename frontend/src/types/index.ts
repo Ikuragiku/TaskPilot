@@ -140,6 +140,48 @@ export interface UpdateGroceryInput {
   done?: boolean;
 }
 
+// Recipe types
+export interface RecipeItem {
+  id: string;
+  name: string;
+  order?: number;
+}
+
+export interface RecipeCategory {
+  id: string;
+  value: string;
+  color: string;
+  order: number;
+  createdAt: string;
+}
+
+export interface Recipe {
+  id: string;
+  title: string;
+  description?: string;
+  portions?: number | null;
+  items: RecipeItem[];
+  categories: RecipeCategory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRecipeInput {
+  title: string;
+  description?: string;
+  portions?: number | null;
+  itemNames?: string[];
+  categoryIds?: string[];
+}
+
+export interface UpdateRecipeInput {
+  title?: string;
+  description?: string | null;
+  portions?: number | null;
+  itemNames?: string[] | null;
+  categoryIds?: string[] | null;
+}
+
 // API Response
 /**
  * Standard API response wrapper.

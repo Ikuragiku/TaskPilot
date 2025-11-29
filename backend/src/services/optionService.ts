@@ -1,3 +1,10 @@
+/**
+ * Option Service
+ *
+ * Business logic for status and project options management.
+ * Handles CRUD operations and automatic order assignment for both status and project options.
+ * Options are global across all users.
+ */
 import prisma from '../prismaClient';
 import { CreateOptionDto, UpdateOptionDto } from '../types';
 

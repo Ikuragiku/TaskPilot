@@ -1,8 +1,3 @@
-import { Router } from 'express';
-import * as ctrl from '../controllers/groceryCategoryController';
-
-const router = Router();
-
 /**
  * Grocery Category Routes
  *
@@ -12,6 +7,11 @@ const router = Router();
  * - PUT `/:id` -> update category
  * - DELETE `/:id` -> remove category
  */
+import { Router } from 'express';
+import * as ctrl from '../controllers/groceryCategoryController';
+
+const router = Router();
+
 router.get('/', ctrl.getCategories);
 router.post('/', ctrl.createCategory);
 router.put('/:id', ctrl.updateCategory);

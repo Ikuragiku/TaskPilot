@@ -1,9 +1,3 @@
-import { Router } from 'express';
-import * as ctrl from '../controllers/groceryController';
-import { authenticate } from '../middleware/auth';
-
-const router = Router();
-
 /**
  * Grocery Routes (authenticated)
  * Mounted at `/api/groceries`. All routes require authentication via `authenticate` middleware.
@@ -13,6 +7,12 @@ const router = Router();
  * - PUT `/:id` -> update grocery
  * - DELETE `/:id` -> delete grocery
  */
+import { Router } from 'express';
+import * as ctrl from '../controllers/groceryController';
+import { authenticate } from '../middleware/auth';
+
+const router = Router();
+
 router.use(authenticate);
 
 router.get('/', ctrl.getGroceries);

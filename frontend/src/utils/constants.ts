@@ -12,6 +12,15 @@ export const SEARCH_KEY = 'organize_me_search_v1';
 export const SHOW_FILTERS_KEY = 'organize_me_show_filters_v1';
 export const SHOW_SORTS_KEY = 'organize_me_show_sorts_v1';
 
+// Recipes-specific UI keys (namespaced so Recipes toolbar/tabs don't share state with Tasks/Groceries)
+export const RECIPES_TABS_KEY = 'organize_me_recipes_tabs_v1';
+export const RECIPES_ACTIVE_TAB_KEY = 'organize_me_recipes_active_tab_v1';
+export const RECIPES_SEARCH_KEY = 'organize_me_recipes_search_v1';
+export const RECIPES_FILTERS_KEY = 'organize_me_recipes_filters_v1';
+export const RECIPES_SORTS_KEY = 'organize_me_recipes_sorts_v1';
+export const RECIPES_SHOW_FILTERS_KEY = 'organize_me_recipes_show_filters_v1';
+export const RECIPES_SHOW_SORTS_KEY = 'organize_me_recipes_show_sorts_v1';
+
 export const DEFAULT_COLUMNS = ['done', 'name', 'description', 'status', 'deadline', 'project'];
 
 export const PALETTE = [

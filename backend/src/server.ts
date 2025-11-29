@@ -19,6 +19,8 @@ import taskRoutes from './routes/taskRoutes'; // Task CRUD endpoints
 import optionRoutes from './routes/optionRoutes'; // Status/project option endpoints
 import groceryRoutes from './routes/groceryRoutes';
 import groceryCategoryRoutes from './routes/groceryCategoryRoutes';
+import recipeRoutes from './routes/recipeRoutes';
+import recipeCategoryRoutes from './routes/recipeCategoryRoutes';
 
 // Error handling middleware
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -84,6 +86,8 @@ app.use('/api/tasks', taskRoutes); // Task endpoints
 app.use('/api/options', optionRoutes); // Status/project option endpoints
 app.use('/api/groceries', groceryRoutes); // Grocery CRUD endpoints
 app.use('/api/grocery-categories', groceryCategoryRoutes); // Grocery-specific categories
+app.use('/api/recipes', recipeRoutes);
+app.use('/api/recipe-categories', recipeCategoryRoutes);
 
 // Error handling middleware (404 and general errors)
 app.use(notFoundHandler);
