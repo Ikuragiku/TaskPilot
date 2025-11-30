@@ -77,6 +77,10 @@ export const TaskDashboard: React.FC = () => {
       return [...DEFAULT_COLUMNS];
     }
   });
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('taskColumnWidths');
+    return saved ? JSON.parse(saved) : { done: 60, name: 300, description: 300, status: 150, deadline: 150, project: 150 };
+  });
 
   const [filters, setFilters] = useState<Filters>(() => {
     try {
@@ -177,6 +181,12 @@ export const TaskDashboard: React.FC = () => {
   useEffect(() => {
     localStorage.setItem(SHOW_SORTS_KEY, JSON.stringify(showSorts));
   }, [showSorts]);
+
+  const handleColumnResize = (columnKey: string, newWidth: number) => {
+    const updated = { ...columnWidths, [columnKey]: Math.max(60, newWidth) };
+    setColumnWidths(updated);
+    localStorage.setItem('taskColumnWidths', JSON.stringify(updated));
+  };
 
   // Filter and sort tasks
   const filteredTasks = filterTasks(tasks, activeTab, filters, search);
@@ -326,6 +336,8 @@ export const TaskDashboard: React.FC = () => {
                 sorts={sorts}
                 setColumns={setColumns}
                 setSorts={setSorts}
+                columnWidths={columnWidths}
+                handleColumnResize={handleColumnResize}
               />
               <tbody ref={tbodyRef}>
                 {isLoading && (

@@ -42,6 +42,7 @@ import RecipeIngredientDropdown from './RecipeIngredientDropdown';
 import RecipeIngredientsModal from './RecipeIngredientsModal';
 import { Filters } from '../../utils/taskFilters';
 import * as recipeApi from '../../services/recipeService';
+import { useToast } from '../common/Toast';
 import {
   RECIPES_TABS_KEY,
   RECIPES_ACTIVE_TAB_KEY,
@@ -115,8 +116,10 @@ const RecipeItemsPreview: React.FC<{ items: Ingredient[]; id: string; onViewAll:
   return (
     <div>
       <div ref={ref} className="recipe-text-clamp">
-        {items.map(it => (
-          <p key={it.id}>{it.name}</p>
+        {items.map((it, idx) => (
+          <p key={it.id}>
+            <strong>{idx + 1}.</strong> {it.name}
+          </p>
         ))}
       </div>
       {showMore && (
@@ -159,6 +162,10 @@ export const RecipesDashboard: React.FC = () => {
   const [recipeItemsModalFor, setRecipeItemsModalFor] = useState<string | null>(null);
   const [recipeItemsModalAnchor, setRecipeItemsModalAnchor] = useState<HTMLElement | null>(null);
   const [recipeContextMenu, setRecipeContextMenu] = useState<{ x: number; y: number; recipeId: string } | null>(null);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('recipeColumnWidths');
+    return saved ? JSON.parse(saved) : { name: 200, ingredients: 250, recipe: 250, portions: 100, category: 180 };
+  });
   const CATS_KEY = 'organize_me_recipe_categories_v1';
   const [categories, setCategories] = useState<{ id: string; value: string; color: string; order: number }[]>(() => []);
 
@@ -177,8 +184,8 @@ export const RecipesDashboard: React.FC = () => {
         const mapped = res.map(r => ({
           id: r.id,
           title: r.title,
-          ingredients: (r.items || []).map((it: any) => ({ id: it.id, name: it.name })),
-          recipeItems: (r.items || []).map((it: any) => ({ id: it.id, name: it.name })),
+          ingredients: (r.items || []).filter((it: any) => !it.type || it.type === 'ingredient').map((it: any) => ({ id: it.id, name: it.name })),
+          recipeItems: (r.items || []).filter((it: any) => it.type === 'step').map((it: any) => ({ id: it.id, name: it.name })),
           portions: typeof r.portions === 'number' ? r.portions : null,
           categoryIds: (r.categories || []).map((c: any) => c.id),
           createdAt: r.createdAt,
@@ -322,8 +329,8 @@ export const RecipesDashboard: React.FC = () => {
       const mapped: LocalRecipe = {
         id: created.id,
         title: created.title,
-        ingredients: (created.items || []).map((it: any) => ({ id: it.id, name: it.name })),
-        recipeItems: (created.items || []).map((it: any) => ({ id: it.id, name: it.name })),
+        ingredients: (created.items || []).filter((it: any) => !it.type || it.type === 'ingredient').map((it: any) => ({ id: it.id, name: it.name })),
+        recipeItems: (created.items || []).filter((it: any) => it.type === 'step').map((it: any) => ({ id: it.id, name: it.name })),
         portions: typeof created.portions === 'number' ? created.portions : null,
         categoryIds: (created.categories || []).map((c: any) => c.id),
         createdAt: created.createdAt,
@@ -358,7 +365,8 @@ export const RecipesDashboard: React.FC = () => {
         if (patch.title !== undefined) payload.title = patch.title;
         if ((patch as any).description !== undefined) payload.description = (patch as any).description;
         if (patch.portions !== undefined) payload.portions = patch.portions;
-        if ((patch as any).recipeItems !== undefined) payload.itemNames = ((patch as any).recipeItems || []).map((it: any) => it.name);
+        if (patch.ingredients !== undefined) payload.ingredientNames = (patch.ingredients || []).map((it: any) => it.name);
+        if ((patch as any).recipeItems !== undefined) payload.stepNames = ((patch as any).recipeItems || []).map((it: any) => it.name);
         if ((patch as any).categoryIds !== undefined) payload.categoryIds = (patch as any).categoryIds;
         await recipeApi.updateRecipe(id, payload);
       } catch (err) {
@@ -371,12 +379,35 @@ export const RecipesDashboard: React.FC = () => {
    * Deletes a recipe with optimistic removal and background API call
    * @param {string} id - Recipe ID to delete
    */
+  const { show } = useToast();
+
   const deleteRecipe = (id: string) => {
     // Optimistic
     setRecipes(prev => prev.filter(r => r.id !== id));
     recipeApi.deleteRecipe(id).catch(() => {
       // If delete fails, we can't recover easily — user can refresh
     });
+  };
+
+  const handleColumnResize = (columnKey: string, newWidth: number) => {
+    const updated = { ...columnWidths, [columnKey]: Math.max(80, newWidth) };
+    setColumnWidths(updated);
+    localStorage.setItem('recipeColumnWidths', JSON.stringify(updated));
+  };
+
+  /**
+   * Adds all ingredients from a recipe to the grocery list.
+   * Uses AI to intelligently map to categories and merge quantities.
+   * @param {string} id - Recipe ID
+   */
+  const addToGroceryList = async (id: string) => {
+    try {
+      const result = await recipeApi.addRecipeToGroceryList(id);
+      show(result.message, { type: 'success' });
+      setRecipeContextMenu(null);
+    } catch (err: any) {
+      show(`Failed to add to grocery list: ${err.message || 'Unknown error'}`, { type: 'error' });
+    }
   };
 
   
@@ -461,10 +492,12 @@ export const RecipesDashboard: React.FC = () => {
                       const field = col.field;
                       const sIdx = field ? sorts.findIndex(s => s.field === field) : -1;
                       const showSort = sIdx >= 0;
+                      const width = columnWidths[col.key];
                       return (
                         <th
                           key={col.key}
                           className={col.key === 'portions' ? 'col-portions' : ''}
+                          style={{ width: width ? `${width}px` : undefined, position: 'relative' }}
                           onClick={(e) => {
                             if (!field) return; // non-sortable
                             const shift = (e as React.MouseEvent).shiftKey;
@@ -488,6 +521,29 @@ export const RecipesDashboard: React.FC = () => {
                               <span className="idx">{sIdx + 1}</span>
                             </span>
                           )}
+                          <div
+                            className="resize-handle"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const startX = e.clientX;
+                              const startWidth = width || 150;
+                              const onMouseMove = (me: MouseEvent) => {
+                                const delta = me.clientX - startX;
+                                handleColumnResize(col.key, startWidth + delta);
+                              };
+                              const onMouseUp = () => {
+                                document.removeEventListener('mousemove', onMouseMove);
+                                document.removeEventListener('mouseup', onMouseUp);
+                              };
+                              document.addEventListener('mousemove', onMouseMove);
+                              document.addEventListener('mouseup', onMouseUp);
+                            }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          />
                         </th>
                       );
                     });
@@ -785,6 +841,13 @@ export const RecipesDashboard: React.FC = () => {
               x={recipeContextMenu.x}
               y={recipeContextMenu.y}
               tab="Delete Recipe"
+                  actions={[
+                    {
+                      label: 'Add to Grocery List',
+                      onClick: () => addToGroceryList(recipeContextMenu.recipeId),
+                      className: 'add-to-grocery'
+                    }
+                  ]}
               onDelete={() => {
                 deleteRecipe(recipeContextMenu.recipeId);
                 setRecipeContextMenu(null);
@@ -920,3 +983,4 @@ export const RecipesDashboard: React.FC = () => {
 };
 
 export default RecipesDashboard;
+ 

@@ -167,7 +167,9 @@ const RecipeIngredientDropdown: React.FC<Props> = ({ anchorEl, recipeId, items, 
                 ) : (
                   <>
                     <span className="grip" title="Drag">⋮⋮</span>
-                    <span className="label">{it.name}</span>
+                    <span className="label">
+                      {label === 'Recipe' ? <><strong>{idx + 1}.</strong> {it.name}</> : it.name}
+                    </span>
                     <span className="grow" />
                     <button className="icon-btn" onClick={(e) => { e.stopPropagation(); onStartEdit(it); }} title="Edit">Edit</button>
                   </>

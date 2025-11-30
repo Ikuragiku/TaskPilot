@@ -1,25 +1,38 @@
-# Organize-me
+# TaskPilot
 
--**Version:** v0.2.6
+**Version:** v0.3.0
 
-## What's new in v0.2.6
-- Grocery domain migrated to the database and fully decoupled from Tasks (new Prisma models).
-- Frontend: Grocery UI split from TaskDashboard and uses dedicated hooks/services (`useGroceries`, `groceryApi`).
-- Backend: Prisma schema updated; authentication now uses `username` instead of `email`.
-- Centralized frontend react-query keys and API path constants for more predictable cache behavior.
-- Optimistic UI updates for category deletions and immediate cache updates after edits.
+## What's new in v0.3.0
+- **Recipes dashboard**: New dedicated workspace for managing recipes with ingredients, steps, portions, and categories.
+- **Filter inheritance**: New items (tasks, groceries, recipes) now inherit active filters/tabs for immediate visibility.
+- **Favicon & dynamic titles**: Custom favicon added; browser tab titles update per route (TaskPilot | Tasks, TaskPilot | Groceries, etc.).
+- **UI refinements**: Removed duplicate add buttons; unified "Add Tab" dropdown labels; multi-sort always available.
+- **Smart quantity merging**: Grocery quantities merge intelligently (kg↔g, l↔ml conversions; numeric unit sums; non-numeric values concatenate).
+- **Stale filter cleanup**: Deleted categories/options are automatically removed from active filters and tabs.
+- **Comprehensive documentation**: All backend services, controllers, and frontend components now have JSDoc comments.
+- **Hub normalization**: Groceries tile always links to `/groceries` regardless of title edits.
 
-> Note: The database schema changed in this release. If you have an existing local DB you will need to reset and reseed it (see `backend/prisma/seed.ts` and the `docs` section below).
+### Previous releases
+**v0.2.6:**
+- Grocery domain migrated to database with dedicated models and API.
+- Backend authentication switched to `username` (from `email`).
+- Optimistic UI updates for smoother interactions.
 
-Organize-me is a full-stack productivity dashboard for managing tasks, projects, and statuses. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
+> Note: The database schema changed in v0.3.0. Reset and reseed your local DB (see Migration section below).
+
+TaskPilot is a full-stack productivity dashboard for managing tasks, groceries, and recipes. It features a modern React frontend and a robust Node/Express backend with PostgreSQL and Prisma.
 
 ## Features
-- Task, project, and status management
-- Drag-and-drop tabs and custom context menus
-- Filter, sort, and search tasks
-- Real-time updates via WebSocket
-- Authentication and user management
-- Persistent UI state (localStorage)
+- **Tasks**: Manage tasks with projects, statuses, deadlines, and descriptions
+- **Groceries**: Track grocery items with categories and quantities
+- **Recipes**: Store recipes with ingredients, cooking steps, portions, and categories
+- **Unified UX**: All dashboards share tabs, filters, sorts, and search functionality
+- **Filter inheritance**: New items automatically adopt active filters for immediate visibility
+- **Drag-and-drop**: Reorder tabs and categories with intuitive drag interactions
+- **Right-click actions**: Context menus for quick delete operations
+- **Real-time updates**: WebSocket integration for collaborative editing
+- **Authentication**: JWT-based user management
+- **Persistent state**: UI preferences saved in localStorage
 
 ## Technologies
 - **Frontend:** React 18, TypeScript, Vite, Zustand, TanStack Query, React Router v6
@@ -71,18 +84,30 @@ Or start manually:
 - `start-all-services.ps1` - PowerShell script to start both frontend and backend
 
 ## Documentation
-All major files are documented with top-level and function comments for easy onboarding and maintainability.
+All major files are documented with JSDoc comments for easy onboarding and maintainability:
+- Backend: Services, controllers, routes, and types fully documented
+- Frontend: All recipe components, services, and utilities documented
+- Architecture diagrams and system overview in `docs/`
 
-Migration & Upgrade Notes
-- After pulling v0.2.6, run the following in `backend` to reset and reseed a local development DB (this is destructive):
+## Migration & Upgrade Notes
+
+### Upgrading to v0.3.0
+After pulling v0.3.0, run the following in `backend` to reset and reseed your local development DB (this is destructive):
 
 ```powershell
+cd backend
 npx prisma migrate reset --force
 npx prisma generate
 npm run prisma:seed
 ```
 
-If you need to preserve data, perform a careful migration or export your data before resetting.
+The seed script creates:
+- A test user (`testuser` / `password123`)
+- Default status and project options
+- Sample grocery categories and items
+- Sample recipe categories and recipes with ingredients/steps
+
+**Important**: This will delete all existing data. If you need to preserve data, export it before resetting or perform a careful manual migration.
 
 ## License
 MIT

@@ -77,6 +77,10 @@ export const GroceryDashboard: React.FC = () => {
       return [...defaultCols];
     }
   });
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('groceryColumnWidths');
+    return saved ? JSON.parse(saved) : { done: 60, name: 300, menge: 150, kategorie: 180 };
+  });
 
   const [filters, setFilters] = useState<Filters>(() => {
     try {
@@ -182,6 +186,12 @@ export const GroceryDashboard: React.FC = () => {
   useEffect(() => {
     localStorage.setItem(SHOW_SORTS_KEY, JSON.stringify(showSorts));
   }, [showSorts]);
+
+  const handleColumnResize = (columnKey: string, newWidth: number) => {
+    const updated = { ...columnWidths, [columnKey]: Math.max(60, newWidth) };
+    setColumnWidths(updated);
+    localStorage.setItem('groceryColumnWidths', JSON.stringify(updated));
+  };
 
   // Filter and sort groceries (simple implementation separate from tasks)
   const filteredTasks = (tasks || []).filter((g) => {
@@ -388,6 +398,9 @@ export const GroceryDashboard: React.FC = () => {
               isSortOpen={showSorts}
             />
           </div>
+          <div className="muted" style={{ fontSize: 12, margin: '6px 0 10px' }}>
+            Hint: Quantities merge intelligently (kg↔g, l↔ml). Non-numeric amounts concatenate.
+          </div>
 
           {(showFilters || showSorts) && (
             <FilterChips
@@ -415,6 +428,8 @@ export const GroceryDashboard: React.FC = () => {
                 sorts={sorts}
                 setColumns={setColumns}
                 setSorts={setSorts}
+                columnWidths={columnWidths}
+                handleColumnResize={handleColumnResize}
               />
               <tbody ref={tbodyRef}>
                 {isLoading && (

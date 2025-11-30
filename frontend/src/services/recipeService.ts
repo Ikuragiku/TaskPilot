@@ -130,3 +130,26 @@ export const deleteRecipeCategory = async (id: string) => {
   const { data } = await api.delete<ApiResponse>(`/api/recipe-categories/${id}`);
   if (!data.success) throw new Error(data.error || 'Failed to delete category');
 };
+
+/**
+ * Adds all ingredients from a recipe to the user's grocery list.
+ * Uses AI to map ingredients to categories and merges quantities for existing items.
+ * @param {string} recipeId - Recipe ID
+ * @returns {Promise<{ added: number; updated: number; failed: number; message: string }>}
+ * @throws {Error} If recipe not found or API call fails
+ */
+export const addRecipeToGroceryList = async (recipeId: string): Promise<{
+  added: number;
+  updated: number;
+  failed: number;
+  message: string;
+}> => {
+  const { data } = await api.post<ApiResponse<{
+    added: number;
+    updated: number;
+    failed: number;
+    message: string;
+  }>>(`/api/recipes/${recipeId}/add-to-groceries`);
+  if (data.success && data.data) return data.data;
+  throw new Error(data.error || 'Failed to add recipe to grocery list');
+};

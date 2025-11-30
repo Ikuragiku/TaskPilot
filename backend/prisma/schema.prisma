@@ -207,12 +207,14 @@ model RecipeItem {
   id        String   @id @default(uuid())
   recipeId  String
   name      String
+  type      String   @default("ingredient") // "ingredient" or "step"
   order     Int      @default(0)
   createdAt DateTime @default(now())
 
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@index([recipeId])
+  @@index([type])
 }
 
 model RecipeCategoryAssignment {

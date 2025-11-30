@@ -10,24 +10,49 @@ This document provides a detailed breakdown of the Organize-me system architectu
 - **Services:** API and WebSocket services for backend communication.
 - **Persistence:** UI state (tabs, filters, sorts) stored in localStorage.
 
-## Recent updates (v0.2.6)
+## Recent updates (v0.3.0)
 
-- Grocery features have been migrated to a first-class `Grocery` domain in the database and fully separated from the Task domain. New Prisma models (e.g. `Grocery`, `GroceryCategory`, `GroceryCategoryAssignment`) and backend routes/services were added.
-- The frontend now contains dedicated grocery hooks, components, and API clients (`useGroceries`, `useGroceryCategories`, `groceryApi`, `groceryCategoryApi`).
-- Authentication schema was simplified to use `username` (replaces prior `email` usage).
-- The frontend centralizes react-query keys and API paths to reduce brittle literal strings and improve cache invalidation.
-- Optimistic UI updates were added for category deletion and other quick interactions to reduce visible flicker.
+### Recipes Domain
+- **Backend**: New Prisma models (`Recipe`, `RecipeItem`, `RecipeCategory`, `RecipeCategoryAssignment`) with full CRUD endpoints.
+- **Frontend**: Dedicated recipes dashboard (`RecipesDashboard.tsx`) with components for ingredient/step management, category assignment, and portions.
+- **Features**: Multi-category assignment, drag-to-reorder items, inline editing, optimistic updates, and API sync with local fallback.
+- **Integration**: Follows the same architectural patterns as Tasks and Groceries for consistency.
 
-> Migration note: These schema changes are non-backwards-compatible with older databases. For development environments, a destructive reset and reseed is recommended (see README and `prisma/seed.ts`).
+### Filter Inheritance
+- New items (tasks, groceries, recipes) now automatically inherit active filters and tab context.
+- When creating an item while viewing a filtered/tabbed view, the new item appears immediately in that view.
+- Implemented by capturing active filters/tabs and passing relevant IDs (statusIds, projectIds, categoryIds, done) to create mutations.
+
+### UI/UX Improvements
+- **Favicon**: Custom SVG favicon with gradient checkmark design.
+- **Dynamic titles**: Browser tab titles update per route (e.g., `TaskPilot | Tasks`).
+- **Stale filter cleanup**: Deleting categories/options now removes them from active filters and tabs to prevent orphaned references.
+- **Multi-sort availability**: "+ Add sort" button now always visible, enabling unlimited sort criteria.
+- **Unified labels**: "Add Tab" dropdown uses generic wording instead of app-specific terms.
+
+### Documentation
+- All backend services, controllers, routes, and types have comprehensive JSDoc comments.
+- All frontend recipe components, services, and utilities fully documented.
+- Architecture and system overview docs updated with latest changes.
+
+> Migration note: v0.3.0 schema changes are non-backwards-compatible. Reset and reseed for development environments (see README).
 
 ## Backend Architecture
 - **Entry Point:** `server.ts` initializes Express server and Socket.io.
-- **Controllers:** Handle business logic for authentication, tasks, options.
-- **Routes:** RESTful endpoints for CRUD operations.
-- **Services:** Encapsulate database access and external logic.
-- **Middleware:** Authentication (JWT), error handling, request validation.
-- **Database:** Prisma ORM models for users, tasks, projects, statuses.
-- **WebSocket:** Socket.io for real-time updates (task/option changes).
+- **Controllers:** Handle business logic for authentication, tasks, groceries, recipes, and options.
+- **Routes:** RESTful endpoints for CRUD operations:
+  - `/api/auth` - Registration and login
+  - `/api/tasks` - Task management
+  - `/api/groceries` - Grocery management
+  - `/api/recipes` - Recipe management
+  - `/api/recipe-categories` - Recipe category management
+  - `/api/grocery-categories` - Grocery category management
+  - `/api/status-options` - Status option management
+  - `/api/project-options` - Project option management
+- **Services:** Encapsulate database access and business logic (taskService, groceryService, recipeService, optionService, socketService).
+- **Middleware:** Authentication (JWT), error handling, request validation (Zod schemas).
+- **Database:** Prisma ORM models for users, tasks, groceries, recipes, and their related entities.
+- **WebSocket:** Socket.io for real-time updates (task/option changes, extensible for recipes/groceries).
 
 ## Data Flow Example
 1. User creates a new task in the frontend.

@@ -4,19 +4,20 @@
  * Renders the table header for Grocerys, including column drag-and-drop and sort controls.
  */
 import React, { useRef } from 'react';
-import { Sort } from '../../utils/taskSort';
 
 type Props = {
   columns: string[];
-  sorts: Sort[];
+  sorts: any[];
   setColumns: React.Dispatch<React.SetStateAction<string[]>>;
-  setSorts: React.Dispatch<React.SetStateAction<Sort[]>>;
+  setSorts: React.Dispatch<React.SetStateAction<any[]>>;
+  columnWidths: Record<string, number>;
+  handleColumnResize: (columnKey: string, newWidth: number) => void;
 };
 
 /**
- * Table header for the grocery table. Supports column reordering and sorting.
+ * Table header for the groceries table. Supports column reordering and sorting.
  */
-export const GroceryTableHeader: React.FC<Props> = ({ columns, sorts, setColumns, setSorts }) => {
+export const GroceryTableHeader: React.FC<Props> = ({ columns, sorts, setColumns, setSorts, columnWidths, handleColumnResize }) => {
   const dragColRef = useRef<string | null>(null);
 
   const labelMap: Record<string, string> = {
@@ -35,10 +36,12 @@ export const GroceryTableHeader: React.FC<Props> = ({ columns, sorts, setColumns
       <tr>
         {columns.map(col => {
           const sIdx = sorts.findIndex(s => s.field === (col === 'name' ? 'title' : col));
+          const width = columnWidths[col];
           return (
             <th
               key={col}
               className={col === 'done' ? 'col-done' : ''}
+              style={{ width: width ? `${width}px` : undefined, position: 'relative' }}
               draggable
               data-col={col}
               onDragStart={(e) => {
@@ -112,6 +115,33 @@ export const GroceryTableHeader: React.FC<Props> = ({ columns, sorts, setColumns
                   <span className="idx">{sIdx + 1}</span>
                 </span>
               )}
+              <div
+                className="resize-handle"
+                draggable={false}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const th = e.currentTarget.parentElement as HTMLElement;
+                  if (th) th.setAttribute('draggable', 'false');
+                  const startX = e.clientX;
+                  const startWidth = width || 150;
+                  const onMouseMove = (me: MouseEvent) => {
+                    const delta = me.clientX - startX;
+                    handleColumnResize(col, startWidth + delta);
+                  };
+                  const onMouseUp = () => {
+                    if (th) th.setAttribute('draggable', 'true');
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                  };
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              />
             </th>
           );
         })}

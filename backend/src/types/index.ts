@@ -84,7 +84,8 @@ export interface CreateRecipeDto {
   title: string;
   description?: string;
   portions?: number | null;
-  itemNames?: string[]; // simple list of item names for creation
+  ingredientNames?: string[]; // ingredients (will have type='ingredient')
+  stepNames?: string[]; // recipe steps (will have type='step')
   categoryIds?: string[];
 }
 
@@ -92,7 +93,8 @@ export interface UpdateRecipeDto {
   title?: string;
   description?: string | null;
   portions?: number | null;
-  itemNames?: string[] | null; // null to clear
+  ingredientNames?: string[] | null; // null to clear ingredients
+  stepNames?: string[] | null; // null to clear steps
   categoryIds?: string[] | null; // null to clear
 }
 

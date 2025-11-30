@@ -90,10 +90,10 @@ const RecipeIngredientsModal: React.FC<Props> = ({ recipeId, items, onClose, onE
           </div>
           <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
             <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
-              {items.length === 0 && <li className="muted">No ingredients</li>}
-              {items.map(i => (
+              {items.length === 0 && <li className="muted">No {label.toLowerCase()}</li>}
+              {items.map((i, idx) => (
                 <li key={i.id} style={{ padding: '0.6rem 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  {i.name}
+                  {label === 'Recipe' ? <><strong>{idx + 1}.</strong> {i.name}</> : i.name}
                 </li>
               ))}
             </ul>

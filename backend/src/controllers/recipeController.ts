@@ -13,7 +13,8 @@ const createSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   portions: z.number().nullable().optional(),
-  itemNames: z.array(z.string()).optional(),
+  ingredientNames: z.array(z.string()).optional(),
+  stepNames: z.array(z.string()).optional(),
   categoryIds: z.array(z.string()).optional(),
 });
 
@@ -21,7 +22,8 @@ const updateSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional().nullable(),
   portions: z.number().nullable().optional(),
-  itemNames: z.array(z.string()).nullable().optional(),
+  ingredientNames: z.array(z.string()).nullable().optional(),
+  stepNames: z.array(z.string()).nullable().optional(),
   categoryIds: z.array(z.string()).nullable().optional(),
 });
 
@@ -141,5 +143,20 @@ export const deleteCategory = async (req: AuthRequest, res: Response, next: Next
   try {
     const result = await recipeService.deleteRecipeCategory(req.params.id);
     res.json({ success: true, data: result });
+  } catch (err) { next(err); return; }
+};
+
+/**
+ * POST /api/recipes/:id/add-to-groceries
+ * Adds all ingredients from a recipe to the user's grocery list.
+ * Uses AI to intelligently map ingredients to grocery categories.
+ * Merges quantities if items already exist.
+ */
+export const addToGroceryList = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) return res.status(401).json({ success: false, error: 'Not authenticated' });
+    const result = await recipeService.addRecipeToGroceryList(req.params.id, req.user.id);
+    res.json({ success: true, data: result });
+    return;
   } catch (err) { next(err); return; }
 };

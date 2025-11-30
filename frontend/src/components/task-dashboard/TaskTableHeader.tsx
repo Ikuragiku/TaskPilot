@@ -11,12 +11,14 @@ type Props = {
   sorts: Sort[];
   setColumns: React.Dispatch<React.SetStateAction<string[]>>;
   setSorts: React.Dispatch<React.SetStateAction<Sort[]>>;
+  columnWidths: Record<string, number>;
+  handleColumnResize: (columnKey: string, newWidth: number) => void;
 };
 
 /**
  * Table header for the tasks table. Supports column reordering and sorting.
  */
-export const TaskTableHeader: React.FC<Props> = ({ columns, sorts, setColumns, setSorts }) => {
+export const TaskTableHeader: React.FC<Props> = ({ columns, sorts, setColumns, setSorts, columnWidths, handleColumnResize }) => {
   const dragColRef = useRef<string | null>(null);
 
   const labelMap: Record<string, string> = {
@@ -33,10 +35,12 @@ export const TaskTableHeader: React.FC<Props> = ({ columns, sorts, setColumns, s
       <tr>
         {columns.map(col => {
           const sIdx = sorts.findIndex(s => s.field === (col === 'name' ? 'title' : col));
+          const width = columnWidths[col];
           return (
             <th
               key={col}
               className={col === 'done' ? 'col-done' : ''}
+              style={{ width: width ? `${width}px` : undefined, position: 'relative' }}
               draggable
               data-col={col}
               onDragStart={(e) => {
@@ -110,6 +114,33 @@ export const TaskTableHeader: React.FC<Props> = ({ columns, sorts, setColumns, s
                   <span className="idx">{sIdx + 1}</span>
                 </span>
               )}
+              <div
+                className="resize-handle"
+                draggable={false}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const th = e.currentTarget.parentElement as HTMLElement;
+                  if (th) th.setAttribute('draggable', 'false');
+                  const startX = e.clientX;
+                  const startWidth = width || 150;
+                  const onMouseMove = (me: MouseEvent) => {
+                    const delta = me.clientX - startX;
+                    handleColumnResize(col, startWidth + delta);
+                  };
+                  const onMouseUp = () => {
+                    if (th) th.setAttribute('draggable', 'true');
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                  };
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              />
             </th>
           );
         })}
